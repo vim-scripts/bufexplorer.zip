@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Thursday, March 14, 2002
-"      Version: 6.0.16
+"  Last Change: Monday, March 25, 2002
+"      Version: 6.1.1
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -33,9 +33,10 @@ endif
 
 let loaded_bufexplorer = 1
 
-" Setup the global MRUList and the autocommand that modify it.
+" Setup the global MRUList.
 let g:MRUList = ','
 
+" Setup the autocommands that handle the MRUList and other stuff.
 augroup bufexplorer
   autocmd!
   autocmd BufEnter * silent call <SID>MRUPush()
@@ -639,7 +640,7 @@ endfunction
 function! <SID>FileNameCmp(line1, line2, direction)
   let f1 = <SID>ExtractFileName(a:line1)
   let f2 = <SID>ExtractFileName(a:line2)
-  return <SID>StrCmp(f1, f2, a:direction)
+  return <SID>StrCmp(toupper(f1), toupper(f2), a:direction)
 endfunction
 
 " BufferNumberCmp

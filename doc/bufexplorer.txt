@@ -1,7 +1,7 @@
-*bufexplorer.txt*  Buffer Explorer  Last Change: March 14, 2002
+*bufexplorer.txt*  Buffer Explorer  Last Change: March 25, 2002
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                              Version 6.0.16
+                              Version 6.1.1
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -109,6 +109,9 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.1.1  - Thanks to Brian D. Goodwin for adding toupper to FileNameCmp. This
+         way buffers sorted by name will be in the correct order regardless of
+         case.
 6.0.16 - Thanks to Andre Pang for the original patch/idea to get bufexplorer
          to work in insertmode/modeless mode (evim). Added Initialize
          and Cleanup autocommands to handle commands that need to be
