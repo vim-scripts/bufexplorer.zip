@@ -10,9 +10,9 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
-"          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Thursday, 15 April 2004
-"      Version: 6.2.3
+"          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.zip
+"  Last Change: Friday, 23 July 2004
+"      Version: 6.3.0
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -55,15 +55,15 @@ augroup End
 
 " Create commands
 if !exists(":BufExplorer")
-  command BufExplorer :call <SID>StartBufExplorer(0)
+  command BufExplorer keepjumps :call <SID>StartBufExplorer(0)
 endif
 
 if !exists(":SBufExplorer")
-  command SBufExplorer :call <SID>StartBufExplorer(1)
+  command SBufExplorer keepjumps :call <SID>StartBufExplorer(1)
 endif
 
 if !exists(":VSBufExplorer")
-  command VSBufExplorer :call <SID>StartBufExplorer(2)
+  command VSBufExplorer keepjumps :call <SID>StartBufExplorer(2)
 endif
 
 " Public Interfaces
@@ -435,7 +435,7 @@ function! <SID>ShowBuffers()
 
   call <SID>AddHeader()
 
-  $ d _
+  $d _
 
   " Prevent odd huge indent when first invoked.
   normal! 0
@@ -481,6 +481,7 @@ function! <SID>ShowBuffers()
 
   " Remove any blank lines.
   silent! g/^\s*$/d
+
   call <SID>CleanUpHistory()
 
   if g:bufExplorerSplitOutPathName
@@ -523,9 +524,7 @@ function! <SID>SplitOutPathName() range
       endwhile
 
       let _cfile = _cfile." ".expand("#"._cnr.":p:h")
-
       "let _cfile = _cfile." ".substitute( expand("#"._cnr.":p:h"), $HOME, "~", "g" )
-
 
       call setline(scanline, _cfile)
 
@@ -659,6 +658,7 @@ function! <SID>ToggleSplitType()
   else
     let g:bufExplorerSplitType = ""
   endif
+
   call <SID>UpdateHeader()
 endfunction
 
