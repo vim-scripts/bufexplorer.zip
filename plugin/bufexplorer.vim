@@ -2,8 +2,8 @@
 "     Name Of File: bufexplorer.vim
 "      Description: Buffer Explorer Plugin
 "       Maintainer: Jeff Lanzarotta (frizbeefanatic@yahoo.com)
-"      Last Change: Tuesday, July 31, 2001
-"          Version: 6.0.4
+"      Last Change: Friday, August 10, 2001
+"          Version: 6.0.5
 "            Usage: Normally, this file should reside in the plugins
 "                   directory and be automatically sourced. If not, you must
 "                   manually source this file using ':source bufexplorer.vim'.
@@ -36,7 +36,12 @@
 "                                                " current.
 "                   The default for this is to split 'above'.
 "
-"          History: 6.0.4 - Thanks to Charles Campbell for making this
+"          History: 6.0.5 - Fixed problems reported by David Pascoe, in that
+"                           you where unable to hit 'd' on a buffer that
+"                           belonged to a files that nolonger existed and
+"                           that the 'yank' buffer was being overridden by the
+"                           help text when the bufexplorer was opened.
+"                   6.0.4 - Thanks to Charles Campbell for making this
 "                           plugin more plugin *compliant*, adding default
 "                           keymappings of <Leader>be and <Leader>bs as well
 "                           as fixing the 'w:sortDirLabel not being defined'
@@ -121,10 +126,10 @@ function! <SID>StartBufExplorer(split)
 
   if a:split || (&modified && &hidden == 0)
     sp [BufExplorer]
-    let w:bufExplorerSplitWindow = 1
+    let s:bufExplorerSplitWindow = 1
   else
     e [BufExplorer]
-    let w:bufExplorerSplitWindow = 0
+    let s:bufExplorerSplitWindow = 0
   endif
 
   call <SID>DisplayBuffers()
@@ -184,7 +189,7 @@ function! <SID>DisplayBuffers()
   1,$d _
 
   call <SID>AddHeader()
-  $ d
+  $ d _
   call <SID>ShowBuffers()
  
   normal! zz
@@ -360,13 +365,10 @@ function! <SID>DeleteBuffer()
   " Skip over the readonly, modified indicators if there is any.
   let _cfile = strpart(_cfile,4,strlen(_cfile))
   
-  " Check it the file exists and is readable.
-  if filereadable(_cfile)
-    " Delete the buffer selected.
-    exec("bd ".(bufnr(_cfile)))
-    " Delete the buffer's name from the list.
-    d _
-  endif
+  " Delete the buffer selected.
+  exec("bd ".(bufnr(_cfile)))
+  " Delete the buffer's name from the list.
+  d _
 
   setlocal nomodifiable
 
@@ -383,18 +385,34 @@ function! <SID>BackToPreviousBuffer()
   let save_sc = &showcmd
   set noshowcmd 
 
-  if(w:bufExplorerSplitWindow == 1)
-    exec("close!")
+  if(s:bufExplorerSplitWindow == 1)
+    exec("silent! close!")
   endif
 
+  let switched = 0
+  
   if(s:alternateBufferNumber != -1)
-    exec("b! ".s:alternateBufferNumber)
+    if filereadable(bufname(s:alternateBufferNumber))
+      exec("b! ".s:alternateBufferNumber)
+      let switched = 1
+    endif
   endif
 
   if(s:currentBufferNumber != -1)
-    exec("b! ".s:currentBufferNumber)
+    if filereadable(bufname(s:currentBufferNumber))
+      exec("b! ".s:currentBufferNumber)
+      let switched = 1
+    endif
   endif
- 
+
+  if switched == 0
+    if s:bufExplorerSplitWindow == 1 && bufwinnr("$") > 1
+      new
+    else
+      enew
+    endif
+  endif
+  
   let &showcmd = save_sc
 
   unlet save_sc
@@ -435,7 +453,7 @@ function! <SID>UpdateHeader()
   
   " Remove old header
   0
-  1,/^"=/ d
+  1,/^"=/ d _
   
   " Add new header
   call <SID>AddHeader()
