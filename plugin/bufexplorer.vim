@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Tuesday, 18 March 2003
-"      Version: 6.1.4
+"  Last Change: Monday, 28 April 2003
+"      Version: 6.1.5
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -77,6 +77,13 @@ endif
 
 if !hasmapto("<Plug>VerticalSplitBufExplorer")
   map <silent> <unique> <Leader>bv :VSBufExplorer<CR>
+endif
+
+" Show default help? If you set this to 0, you're on your own remembering that
+" '?' brings up the help and what the sort order is.
+" 0 = Don't show, 1 = Do show.
+if !exists("g:bufExplorerDefaultHelp")
+  let g:bufExplorerDefaultHelp = 1
 endif
 
 " Show detailed help by default?
@@ -375,7 +382,12 @@ endif
 
 " AddHeader {{{1
 function! <SID>AddHeader()
+  if g:bufExplorerDefaultHelp == 0 && g:bufExplorerDetailedHelp == 0
+    return
+  endif
+
   1
+
   if g:bufExplorerDetailedHelp == 1
     let header = "\" Buffer Explorer\n"
     let header = header."\" ----------------\n"
@@ -431,6 +443,7 @@ function! <SID>ShowBuffers()
   call <SID>AddHeader()
 
   $ d _
+
   " Prevent odd huge indent when first invoked.
   normal! 0
 
@@ -444,7 +457,7 @@ function! <SID>ShowBuffers()
   let @a = a_save
   unlet a_save
 
-  " Remove the *line* and double quotes from the lines.
+  " Remove the word *line* and double quotes from the lines.
   let filenames = substitute(filenames, "\\(\\s*\\d\\+[^\"]\\{-}\\)\\%(\"\\)\\([^\"]\\+\\)\\%(\"[^\n]*\\)\\(\n\\|$\\)", "\\1\\2\\3", "g")
 
   " Hide [.*] Buffer names ([No File], [BufExplorer],...)
@@ -472,6 +485,9 @@ function! <SID>ShowBuffers()
   let _lineNbr = line(".") + 1
 
   put = filenames
+
+  " Remove any blank lines.
+  silent! g/^\s*$/d
 
   if g:bufExplorerSplitOutPathName
     exe _lineNbr.",$call <SID>SplitOutPathName()"
@@ -818,6 +834,7 @@ function! <SID>SortListing()
   setlocal modifiable
 
   0
+
   if g:bufExplorerSortBy == "number"
     let cmpFunction = "<SID>BufferNumberCmp"
   elseif g:bufExplorerSortBy == "name"
@@ -826,7 +843,11 @@ function! <SID>SortListing()
     let cmpFunction = "<SID>MRUCmp"
   endif
 
-  /^"=/+1,$call <SID>Sort(cmpFunction, g:bufExplorerSortDirection)
+  if g:bufExplorerDefaultHelp == 0 && g:bufExplorerDetailedHelp == 0
+    1,$call <SID>Sort(cmpFunction, g:bufExplorerSortDirection)
+  else
+    /^"=/+1,$call <SID>Sort(cmpFunction, g:bufExplorerSortDirection)
+  endif
 
   call <SID>CleanUpHistory()
   call <SID>UpdateHeader()

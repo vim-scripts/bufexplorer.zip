@@ -1,7 +1,7 @@
-*bufexplorer.txt*          Buffer Explorer          Last Change: 18 March 2003
+*bufexplorer.txt*          Buffer Explorer          Last Change: 28 April 2003
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                              Version 6.1.4
+                              Version 6.1.5
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -111,6 +111,7 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.1.5  - Thanks to Khorev Sergey. Added option to show default help or not.
 6.1.4  - Thanks goes out to Valery Kondakoff for suggesting the addition of
          setlocal nonumber and foldcolumn=0. This allows for line numbering
          and folding to be turned off temporarily while in the explorer.
