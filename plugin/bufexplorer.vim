@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Thursday, 08 January 2004
-"      Version: 6.2.2
+"  Last Change: Thursday, 15 April 2004
+"      Version: 6.2.3
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -241,6 +241,7 @@ function! <SID>StartBufExplorer(split)
   endif
 
   let _splitbelow = &splitbelow
+  let g:bufExplorerSplitType = ""
 
   if a:split == 2
     let g:bufExplorerSplitType = "v"
@@ -522,6 +523,10 @@ function! <SID>SplitOutPathName() range
       endwhile
 
       let _cfile = _cfile." ".expand("#"._cnr.":p:h")
+
+      "let _cfile = _cfile." ".substitute( expand("#"._cnr.":p:h"), $HOME, "~", "g" )
+
+
       call setline(scanline, _cfile)
 
       let scanline = scanline + 1

@@ -1,7 +1,7 @@
-*bufexplorer.txt*          Buffer Explorer        Last Change: 08 January 2004
+*bufexplorer.txt*          Buffer Explorer        Last Change: 15 April 2004
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                              Version 6.2.2
+                              Version 6.2.3
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -112,6 +112,11 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.2.3  - Thanks to Jay Logan for finding a bug in the vertical split postion
+         of the code. When selecting that the window was to be split
+         vertically by doing a '\bv', from then on, all splits, i.e. '\bs',
+         were split vertically, even though g:bufExplorerSplitType was not set
+         to 'v'.
 6.2.2  - Thanks to Patrik Modesto for adding a small improvement. For some
          reason his bufexplorer window was always showing up folded. He added
          'setlocal nofoldenable' and it was fixed.
