@@ -2,8 +2,8 @@
 "     Name Of File: bufexplorer.vim
 "      Description: Buffer Explorer Plugin
 "       Maintainer: Jeff Lanzarotta (frizbeefanatic@yahoo.com)
-"      Last Change: Thursday, June 28, 2001
-"          Version: 6.0.2
+"      Last Change: Thursday, July 27, 2001
+"          Version: 6.0.3
 "            Usage: Normally, this file should reside in the plugins
 "                   directory and be automatically sourced. If not, you must
 "                   manually source this file using ':source bufexplorer.vim'.
@@ -30,6 +30,9 @@
 "                     let g:bufExplSplitBelow=1  " Put new window below
 "                                                " current.
 "                   The default for this is to split 'above'.
+"
+"          History: 6.0.3 - Added sorting capabilities.
+"                   6.0.2 - Can't remember.
 "=============================================================================
 
 " Has this already been loaded?
@@ -56,11 +59,26 @@ if !exists("g:bufExplorerDetailedHelp")
   let g:bufExplorerDetailedHelp = 0
 endif
 
+" Field to sort by
+if !exists("g:bufExplorerSortBy")
+  let g:bufExplorerSortBy = 'number'
+endif
+
 " When opening a new windows, split the new windows below or above the
 " current window?  1 = below, 0 = above.
 if !exists("g:bufExplSplitBelow")
   let g:bufExplSplitBelow = &splitbelow
 endif
+
+if !exists("g:bufExplorerSortDirection")
+  let g:bufExplorerSortDirection = 1
+  let w:sortDirLabel = ""
+else
+  let w:sortDirLabel = "reverse"
+endif
+
+" Characters that must be escaped for a regular expression.
+let s:escregexp = '/*^$.~\'
 
 " 
 " StartBufExplorer
@@ -72,7 +90,9 @@ function! s:StartBufExplorer(split)
   " Save current and alternate buffer numbers for later.
   let s:currentBufferNumber = bufnr("%")
   let s:alternateBufferNumber = bufnr("#")
-  
+
+  let s:maxFileLen = 0
+ 
   " Set to our new values.
   let &splitbelow = g:bufExplSplitBelow
 
@@ -113,11 +133,13 @@ function! s:DisplayBuffers()
   if has("syntax")
     syn match bufExplorerHelp    "^\"[ -].*"
     syn match bufExplorerHelpEnd "^\"=.*$"
+    syn match bufExplorerSortBy  "^\" Sorted by .*$"
 
     if !exists("g:did_bufexplorer_syntax_inits")
       let g:did_bufexplorer_syntax_inits = 1
-      hi link bufExplorerHelp Special
-      hi link bufExplorerHelpEnd Special
+      hi def link bufExplorerHelp Special
+      hi def link bufExplorerHelpEnd Special
+      hi def link bufExplorerSortBy String
     endif
   endif
   
@@ -126,10 +148,12 @@ function! s:DisplayBuffers()
   else
     let w:longHelp = g:bufExplorerDetailedHelp
   endif
- 
+
   nnoremap <buffer> <cr> :call <SID>SelectBuffer()<cr>
   nnoremap <buffer> d :call <SID>DeleteBuffer()<cr>
   nnoremap <buffer> q :call <SID>BackToPreviousBuffer()<cr>
+  nnoremap <buffer> s :call <SID>SortSelect()<cr>
+  nnoremap <buffer> r :call <SID>SortReverse()<cr>
   nnoremap <buffer> ? :call <SID>ToggleHelp()<cr>
   nnoremap <buffer> <2-leftmouse> :call <SID>DoubleClick()<cr>
  
@@ -162,12 +186,15 @@ function! s:AddHeader()
     let header = header."\" <enter> or Mouse-Double-Click : open buffer under cursor\n"
     let header = header."\" d : delete buffer.\n" 
     let header = header."\" q : quit the Buffer Explorer\n"
+    let header = header."\" s : select sort field    r : reverse sort\n"
     let header = header."\" ? : toggle this help\n"
   else
     let header = "\" Press ? for Help\n"
   endif
-
+  
+  let header = header."\" Sorted by ".w:sortDirLabel.g:bufExplorerSortBy."\n"
   let header = header."\"=\n"
+  
   put! =header
 
   unlet header
@@ -200,6 +227,13 @@ function! s:ShowBuffers()
       " a name, process it.
       if(strlen(_BufName))
         if(matchstr(_BufName, "BufExplorer\]") == "")
+
+          let len = strlen(_BufName)
+          
+          if len > s:maxFileLen
+            let s:maxFileLen = len
+          endif
+
           if(bufnr(_BufName) == s:currentBufferNumber)
             let fileNames = fileNames.'%'
           else
@@ -231,7 +265,6 @@ function! s:ShowBuffers()
           endif
 
           let fileNames = fileNames.' '
- 
           let fileNames = fileNames._BufName."\n"
         endif
       endif
@@ -240,6 +273,8 @@ function! s:ShowBuffers()
 
   put =fileNames
 
+  call s:SortListing("")
+  
   let &report = oldRep
   let &showcmd = save_sc
   
@@ -262,8 +297,7 @@ function! s:SelectBuffer()
   endif
  
   " Skip over the readonly, modified indicators if there is any.
-  let _cfile = strpart(_cfile,4,strlen(_cfile))
-  "let _cfile = substitute(_cfile, "\\", "\\\\", "g")
+  let _cfile = s:ExtractFileName(_cfile)
 
   if(strlen(_cfile))
     " Get the buffer number associated with this filename.
@@ -302,7 +336,6 @@ function! s:DeleteBuffer()
   let _cfile = getline('.')
   " Skip over the readonly, modified indicators if there is any.
   let _cfile = strpart(_cfile,4,strlen(_cfile))
-"  let _cfile = substitute(_cfile, "\\", "\\\\", "g")
   
   " Check it the file exists and is readable.
   if filereadable(_cfile)
@@ -396,7 +429,169 @@ function! s:UpdateHeader()
 endfunction
 
 "
-" Double click with the mouse
+" ExtractFileName
+"
+function! s:ExtractFileName(line)
+  return strpart(a:line, 4, strlen(a:line))
+endfunction
+
+"
+" FileNameCmp
+"
+function! s:FileNameCmp(line1, line2, direction)
+  let f1 = s:ExtractFileName(a:line1)
+  let f2 = s:ExtractFileName(a:line2)
+  
+  return s:StrCmp(f1, f2, a:direction)
+endfunction
+
+"
+" BufferNumberCmp
+"
+function! s:BufferNumberCmp(line1, line2, direction)
+  let f1 = bufnr(s:ExtractFileName(a:line1))
+  let f2 = bufnr(s:ExtractFileName(a:line2))
+
+  return s:StrCmp(f1, f2, a:direction)
+endfunction
+
+"
+" StrCmp - General string comparison function
+"
+function! s:StrCmp(line1, line2, direction)
+  if a:line1 < a:line2
+    return -a:direction
+  elseif a:line1 > a:line2
+    return a:direction
+  else
+    return 0
+  endif
+endfunction
+
+"
+" SortR() is called recursively.
+"
+function! s:SortR(start, end, cmp, direction)
+  " Bottom of the recursion if start reaches end
+  if a:start >= a:end
+    return
+  endif
+  
+  let partition = a:start - 1
+  let middle = partition
+  let partStr = getline((a:start + a:end) / 2)
+
+  let i = a:start
+  while (i <= a:end)
+    let str = getline(i)
+
+    exec "let result = " . a:cmp . "(str, partStr, " . a:direction . ")"
+
+    if result <= 0
+      " Need to put it before the partition.  Swap lines i and partition.
+      let partition = partition + 1
+      if result == 0
+        let middle = partition
+      endif
+      if i != partition
+        let str2 = getline(partition)
+        call setline(i, str2)
+        call setline(partition, str)
+      endif
+    endif
+
+    let i = i + 1
+  endwhile
+
+  " Now we have a pointer to the "middle" element, as far as partitioning
+  " goes, which could be anywhere before the partition.  Make sure it is at
+  " the end of the partition.
+  if middle != partition
+    let str = getline(middle)
+    let str2 = getline(partition)
+    call setline(middle, str2)
+    call setline(partition, str)
+  endif
+
+  call s:SortR(a:start, partition - 1, a:cmp, a:direction)
+  call s:SortR(partition + 1, a:end, a:cmp, a:direction)
+endfunction
+
+" Sort
+"
+function! s:Sort(cmp, direction) range
+  call s:SortR(a:firstline, a:lastline, a:cmp, a:direction)
+endfunction
+
+"
+" SortReverse
+"
+function! s:SortReverse()
+  if g:bufExplorerSortDirection == -1
+    let g:bufExplorerSortDirection = 1
+    let w:sortDirLabel = ""
+  else
+    let g:bufExplorerSortDirection = -1
+    let w:sortDirLabel = "reverse "
+  endif
+  
+  call s:SortListing("")
+endfunction
+
+"
+" SortSelect
+"
+function! s:SortSelect()
+  " Select the next sort option
+  if !exists("g:bufExplorerSortBy")
+    let g:bufExplorerSortBy = "number"
+  elseif g:bufExplorerSortBy == "number"
+    let g:bufExplorerSortBy = "name"
+  elseif g:bufExplorerSortBy == "name"
+    let g:bufExplorerSortBy = "number"
+  endif
+  
+  call s:SortListing("")
+endfunction
+
+"
+" SortListing
+"
+function! s:SortListing(msg)
+  " Save the line we start on so we can go back there when done sorting.
+  let startline = getline(".")
+  let col = col(".")
+  let lin = line(".")
+
+  " Allow modification
+  setlocal modifiable
+
+  " Do the sort.
+  0
+  if g:bufExplorerSortBy == "number"
+    /^"=/+1,$call s:Sort("s:BufferNumberCmp", g:bufExplorerSortDirection)
+  else
+    /^"=/+1,$call s:Sort("s:FileNameCmp", g:bufExplorerSortDirection)
+  endif
+
+  " Replace the header with updated information.
+  call s:UpdateHeader()
+  
+  " Return to the position we started at.
+  0
+  if search('\m^'.escape(startline,s:escregexp),'W') <= 0
+    execute lin
+  endif
+  
+  execute "normal!" col . "|"
+
+  " Disallow modification.
+  setlocal nomodified
+  setlocal nomodifiable
+endfunction
+
+"
+" DoubleClick - Double click with the mouse.
 "
 function s:DoubleClick()
   call s:SelectBuffer()
