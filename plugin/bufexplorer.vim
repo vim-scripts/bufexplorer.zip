@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Friday, 13 June 2003
-"      Version: 6.2.0
+"  Last Change: Thursday, 09 October 2003
+"      Version: 6.2.1
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -85,7 +85,7 @@ if !exists("g:bufExplorerDetailedHelp")
 endif
 
 " Sort method.
-" Can be either 'number', 'name' or 'mru'.
+" Can be either 'number', 'name', 'mru', or 'fullpath'.
 if !exists("g:bufExplorerSortBy")
   let g:bufExplorerSortBy = "mru"
 endif
@@ -718,7 +718,6 @@ endfunction
 function! <SID>MRUCmp(line1, line2, direction)
   let n1 = <SID>ExtractBufferNbr(a:line1)
   let n2 = <SID>ExtractBufferNbr(a:line2)
-
   let i1 = stridx(g:MRUList, ','.n1.',')
   let i2 = stridx(g:MRUList, ','.n2.',')
 
@@ -730,6 +729,17 @@ function! <SID>MRUCmp(line1, line2, direction)
         \ - a:direction*( (i1 != -1 && i2 == -1) - (i1 == -1 && i2 != -1) )
         \ + a:direction*(i1 == -1 && i2 == -1)*(n1 - n2)
   return val
+endfunction
+
+" FullPathCmp {{{1
+function! <SID>FullPathCmp(line1, line2, direction)
+  let d1 = expand("#".<SID>ExtractBufferNbr(a:line1).":p:h")
+  let d2 = expand("#".<SID>ExtractBufferNbr(a:line2).":p:h")
+  if d1 == d2
+    return <SID>FileNameCmp(a:line1, a:line2, a:direction)
+  else
+    return <SID>StrCmp(d1, d2, a:direction)
+  endif
 endfunction
 
 " SortR *called recursively* {{{1
@@ -811,6 +821,8 @@ function! <SID>SortSelect()
   elseif g:bufExplorerSortBy == "name"
     let g:bufExplorerSortBy = "mru"
   elseif g:bufExplorerSortBy == "mru"
+    let g:bufExplorerSortBy = "fullpath"
+  elseif g:bufExplorerSortBy == "fullpath"
     let g:bufExplorerSortBy = "number"
   endif
 
@@ -831,8 +843,10 @@ function! <SID>SortListing()
     let cmpFunction = "<SID>BufferNumberCmp"
   elseif g:bufExplorerSortBy == "name"
     let cmpFunction = "<SID>FileNameCmp"
-  else
+  elseif g:bufExplorerSortBy == "mru"
     let cmpFunction = "<SID>MRUCmp"
+  else
+    let cmpFunction = "<SID>FullPathCmp"
   endif
 
   if g:bufExplorerDefaultHelp == 0 && g:bufExplorerDetailedHelp == 0

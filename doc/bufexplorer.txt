@@ -1,7 +1,7 @@
-*bufexplorer.txt*          Buffer Explorer          Last Change: 13 June 2003
+*bufexplorer.txt*          Buffer Explorer        Last Change: 09 October 2003
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                              Version 6.2.0
+                              Version 6.2.1
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -73,6 +73,7 @@ To control what field the buffers are sorted by, use: >
   let g:bufExplorerSortBy='number'     " Sort by the buffer's number.
   let g:bufExplorerSortBy='name'       " Sort by the buffer's name.
   let g:bufExplorerSortBy='mru'        " Sort by most recently used.
+  let g:bufExplorerSortBy='fullPath'   " Sort by full file path name.
 The default is to sort by mru.
 
                                                       *g:bufExplorerSplitBelow*
@@ -111,6 +112,8 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.2.1  - Thanks goes out to Takashi Matsuo for added the 'fullPath' sorting
+         logic and option.
 6.2.0  - Thanks goes out to Simon Johann-Günter for spotting and fixing a
          problem in that the last search pattern is overriden by the search
          pattern for blank lines.
