@@ -1,8 +1,8 @@
-*bufexplorer.txt*  Buffer Explorer  January 14, 2002
+*bufexplorer.txt*  Buffer Explorer  Last Change: January 25, 2002
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
 
-Plugin for easilty exploring open buffers
+Plugin for easilty exploring (or browsing) open buffers
 
 |bufexplorer-usage|          Usage
 |bufexplorer-customization|  Customization
@@ -11,12 +11,16 @@ Plugin for easilty exploring open buffers
 |bufexplorer-todo|           Todo
 |bufexplorer-credits|        Credits
 
-==============================================================================
-Usage                                                      *bufexplorer-usage*
+This plugin is only available if 'compatible' is not set.
 
-To start exploring in the current window, use:
+{Vi does not have any of this}
+
+==============================================================================
+USAGE                                                      *bufexplorer-usage*
+
+To start exploring in the current window, use: >
  \be  or  :BufExplorer
-To start exploring in a newly split window, use:
+To start exploring in a newly split window, use: >
  \be  or  :SBufExplorer
 
 Note: If the current buffer is modified, the current window is always
@@ -48,44 +52,50 @@ close it(delete), resort the list, reverse the sort, quit explorering
 and so on...
 
 You can avoid loading this plugin by setting the "loaded_bufexplorer"
-variable:
+variable: >
   :let loaded_bufexplorer = 1
 
 ===============================================================================
-Customization                                       *bufexplorer-customization*
+CUSTOMIZATION                                       *bufexplorer-customization*
 
                                                     *g:bufExplorerDetailedHelp*
-To control whether detailed help is display by, use:
+To control whether detailed help is display by, use: >
   let g:bufExplorerDetailedHelp=1
 The default is not to show detailed help.
-                                                    *g:bufExplorerSortBy*
-To control what field the buffers are sorted by, use:
+
+                                                          *g:bufExplorerSortBy*
+To control what field the buffers are sorted by, use: >
   let g:bufExplorerSortBy='number'     " Sort by the buffer's number.
   let g:bufExplorerSortBy='name'       " Sort by the buffer's name.
   let g:bufExplorerSortBy='mru'        " Sort by most recently used.
 The default is to sort by number.
-                                                    *g:bufExplorerSplitBelow*
+
+                                                      *g:bufExplorerSplitBelow*
 To control where the new split window will be placed above or below the
-current window, use:
+current window, use: >
   let g:bufExplorerSplitBelow=1        " Split new window below current.
   let g:bufExplorerSplitBelow=0        " Split new window above current.
 The default it to use what ever is set by the global &splitbelow
 variable.
 
-To control whether to sort the buffers in forward or reverse order, use:
+                                                   *g:bufExplorerSortDirection*
+To control whether to sort the buffers in forward or reverse order, use: >
   let g:bufExplorerSortDirection=1     " Sort in forward order.
   let g:bufExplorerSortDirection=-1    " Sort in reverse order.
 
-To control whether to split out the path and file name or not, use:
+                                                *g:bufExplorerSplitOutPathName*
+To control whether to split out the path and file name or not, use: >
   let g:bufExplorerSplitOutPathName=1  " Split the path and file name.
   let g:bufExplorerSplitOutPathName=-1 " Don't split the path and file
                                        " name.
 
 ===============================================================================
-Change Log                                              *bufexplorer-changelog*
+CHANGE LOG                                              *bufexplorer-changelog*
 
-6.0.10 - Added the necessary hooks so that the winmanager.vim script
-         could more easily integrate with this script.
+6.0.11 - Fixed bug report by Xiangjiang Ma. '"=' was being added to the
+         search history which messed up hlsearch.
+6.0.10 - Added the necessary hooks so that the Srinath Avadhanula's
+         winmanager.vim script could more easily integrate with this script.
          Tried to improve performance.
 6.0.9  - Added MRU (Most Recently Used) sort ordering.
 6.0.8  - Was not resetting the showcmd command correctly.
@@ -109,17 +119,19 @@ Change Log                                              *bufexplorer-changelog*
 6.0.1  - Initial release.
 
 ===============================================================================
-Todo                                                         *bufexplorer-todo*
+TODO                                                         *bufexplorer-todo*
 
 Improve performance even more.
 
 ===============================================================================
-Credits                                                   *bufexplorer-credits*
+CREDITS                                                   *bufexplorer-credits*
 
 Author: Jeff Lanzarotta <jefflanzarotta@yahoo.com>
 
-With help and suggestions from: Charles Campbell
-                                Brett Carlane
+Credit must go out to Bram Moolenaar and all the Vim developers for
+making the world's best editor (IMHO). I also want to thank everyone who
+help and gave me suggestions. I wouldn't want to leave anyone out so I
+won't list names.
 
-
-vim:tw=78:ts=8:ft=help
+===============================================================================
+vim:tw=78:noet:ts=8:ft=help:norl:

@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta@yahoo.com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Monday, January 14, 2001
-"      Version: 6.0.10
+"  Last Change: Friday, January 25, 2001
+"      Version: 6.0.11
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -560,7 +560,7 @@ function! <SID>UpdateHeader()
   0
   1,/^"=/ d _
 
-  " Add new header
+  call <SID>CleanUpHistory()
   call <SID>AddHeader()
 
   " Go back where we came from if possible.
@@ -732,6 +732,7 @@ function! <SID>SortListing()
 
   /^"=/+1,$call <SID>Sort(cmpFunction, g:bufExplorerSortDirection)
 
+  call <SID>CleanUpHistory()
   call <SID>UpdateHeader()
 
   setlocal nomodified
@@ -802,6 +803,12 @@ function! <SID>DoAnyMoreBuffersExist()
   endwhile
 
   return 0
+endfunction
+
+" CleanUpHistory
+function! <SID>CleanUpHistory()
+  call histdel("/", -1)
+  let @/ = histget("/", -1)
 endfunction
 
 " vim:sw=2:ts=2:et
