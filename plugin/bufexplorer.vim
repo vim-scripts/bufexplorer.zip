@@ -1,54 +1,66 @@
 "=============================================================================
-"     Name Of File: bufexplorer.vim
-"      Description: Buffer Explorer Plugin
-"       Maintainer: Jeff Lanzarotta (frizbeefanatic@yahoo.com)
-"      Last Change: Friday, August 10, 2001
-"          Version: 6.0.5
-"            Usage: Normally, this file should reside in the plugins
-"                   directory and be automatically sourced. If not, you must
-"                   manually source this file using ':source bufexplorer.vim'.
+"    Copyright: Copyright (C) 2001 Jeff Lanzarotta
+"               Permission is hereby granted to use and distribute this code,
+"               with or without modifications, provided that this copyright
+"               notice is copied with it. Like anything else that's free,
+"               bufexplorer.vim is provided *as is* and comes with no
+"               warranty of any kind, either expressed or implied. In no
+"               event will the copyright holder be liable for any damamges
+"               resulting from the use of this software.
+" Name Of File: bufexplorer.vim
+"  Description: Buffer Explorer Vim Plugin
+"   Maintainer: Jeff Lanzarotta (frizbeefanatic@yahoo.com)
+"  Last Change: Friday, August 24, 2001
+"      Version: 6.0.6
+"        Usage: Normally, this file should reside in the plugins
+"               directory and be automatically sourced. If not, you must
+"               manually source this file using ':source bufexplorer.vim'.
 "
-"                   Run ':BufExplorer' to launch the explorer and runs the
-"                   user-specified command in the current window, or
-"                   ':SBufExplorer' to launch the explorer and run the
-"                   user-specified command in the the newly split window.
+"               Run ':BufExplorer' to launch the explorer and runs the
+"               user-specified command in the current window, or
+"               ':SBufExplorer' to launch the explorer and run the
+"               user-specified command in the the newly split window.
 "                 
-"                   You may use the default keymappings of
+"               You may use the default keymappings of
 "                   
-"                     <Leader>be  - Opens BufExplorer
-"                     <Leader>bs  - Opens split windows BufExplorer
+"                 <Leader>be  - Opens BufExplorer
+"                 <Leader>bs  - Opens split windows BufExplorer
 "
-"                   or you may want to add something like the following
-"                   three key mappings to your _vimrc/.vimrc file.
+"               or you may want to add something like the following
+"               three key mappings to your _vimrc/.vimrc file.
 "                   
-"                     map <Leader>b :BufExplorer<cr>
-"                     map <Leader>B :SBufExplorer<cr>
-"                     map <c-leftmouse> :BufExplorer<cr>
+"                 map <Leader>b :BufExplorer<cr>
+"                 map <Leader>B :SBufExplorer<cr>
+"                 map <c-leftmouse> :BufExplorer<cr>
 "
-"                   If the current buffer is modified, the current window is
-"                   always split.
+"               If the current buffer is modified, the current window is
+"               always split.
 "                  
-"                   To control where the new split windows goes relative to
-"                   the current window, use the variable:"                   
-"                     let g:bufExplSplitBelow=0  " Put new window above
-"                                                " current.
-"                     let g:bufExplSplitBelow=1  " Put new window below
-"                                                " current.
-"                   The default for this is to split 'above'.
+"               To control where the new split windows goes relative to
+"               the current window, use the variable:"
+"               
+"                 let g:bufExplSplitBelow=0  " Put new window above
+"                                            " current.
+"                 let g:bufExplSplitBelow=1  " Put new window below
+"                                            " current.
+"                                            
+"               The default for this is to split 'above'.
 "
-"          History: 6.0.5 - Fixed problems reported by David Pascoe, in that
-"                           you where unable to hit 'd' on a buffer that
-"                           belonged to a files that nolonger existed and
-"                           that the 'yank' buffer was being overridden by the
-"                           help text when the bufexplorer was opened.
-"                   6.0.4 - Thanks to Charles Campbell for making this
-"                           plugin more plugin *compliant*, adding default
-"                           keymappings of <Leader>be and <Leader>bs as well
-"                           as fixing the 'w:sortDirLabel not being defined'
-"                           bug.
-"                   6.0.3 - Added sorting capabilities. Sort taken from
-"                           explorer.vim.
-"                   6.0.2 - Can't remember.
+"      History: 6.0.6 - Copyright notice added. Fixed problem with the
+"                 SortListing() function failing when there was only one
+"                 buffer to display.
+"               6.0.5 - Fixed problems reported by David Pascoe, in that
+"                 you where unable to hit 'd' on a buffer that belonged to a
+"                 files that nolonger existed and that the 'yank' buffer was
+"                 being overridden by the help text when the bufexplorer was
+"                 opened.
+"               6.0.4 - Thanks to Charles Campbell for making this plugin
+"                 more plugin *compliant*, adding default keymappings
+"                 of <Leader>be and <Leader>bs as well as fixing the
+"                 'w:sortDirLabel not being defined' bug.
+"               6.0.3 - Added sorting capabilities. Sort taken from
+"                 explorer.vim.
+"               6.0.2 - Can't remember.
 "=============================================================================
 
 " Has this already been loaded?
@@ -615,17 +627,19 @@ function! <SID>SortListing(msg)
   " Do the sort.
   0
   if g:bufExplorerSortBy == "number"
-    /^"=/+1,$call <SID>Sort("<SID>BufferNumberCmp", g:bufExplorerSortDirection)
+    let cmpFunction = "<SID>BufferNumberCmp"
   else
-    /^"=/+1,$call <SID>Sort("<SID>FileNameCmp", g:bufExplorerSortDirection)
+    let cmpFunction = "<SID>FileNameCmp"
   endif
+
+  /^"=/+1,$call <SID>Sort(cmpFunction, g:bufExplorerSortDirection)
 
   " Replace the header with updated information.
   call <SID>UpdateHeader()
   
   " Return to the position we started at.
   0
-  if search('\m^'.escape(startline,s:escregexp),'W') <= 0
+  if search('\m^'.escape(startline, s:escregexp), 'W') <= 0
     execute lin
   endif
   
@@ -634,6 +648,8 @@ function! <SID>SortListing(msg)
   " Disallow modification.
   setlocal nomodified
   setlocal nomodifiable
+  
+  unlet startline col lin cmpFunction
 endfunction
 
 "
