@@ -2,8 +2,8 @@
 "     Name Of File: bufexplorer.vim
 "      Description: Buffer Explorer Plugin
 "       Maintainer: Jeff Lanzarotta (frizbeefanatic@yahoo.com)
-"      Last Change: Thursday, July 27, 2001
-"          Version: 6.0.3
+"      Last Change: Tuesday, July 31, 2001
+"          Version: 6.0.4
 "            Usage: Normally, this file should reside in the plugins
 "                   directory and be automatically sourced. If not, you must
 "                   manually source this file using ':source bufexplorer.vim'.
@@ -12,9 +12,14 @@
 "                   user-specified command in the current window, or
 "                   ':SBufExplorer' to launch the explorer and run the
 "                   user-specified command in the the newly split window.
-"                  
-"                   You may want to add the following three key mappings to
-"                   your _vimrc/.vimrc file.
+"                 
+"                   You may use the default keymappings of
+"                   
+"                     <Leader>be  - Opens BufExplorer
+"                     <Leader>bs  - Opens split windows BufExplorer
+"
+"                   or you may want to add something like the following
+"                   three key mappings to your _vimrc/.vimrc file.
 "                   
 "                     map <Leader>b :BufExplorer<cr>
 "                     map <Leader>B :SBufExplorer<cr>
@@ -31,7 +36,13 @@
 "                                                " current.
 "                   The default for this is to split 'above'.
 "
-"          History: 6.0.3 - Added sorting capabilities.
+"          History: 6.0.4 - Thanks to Charles Campbell for making this
+"                           plugin more plugin *compliant*, adding default
+"                           keymappings of <Leader>be and <Leader>bs as well
+"                           as fixing the 'w:sortDirLabel not being defined'
+"                           bug.
+"                   6.0.3 - Added sorting capabilities. Sort taken from
+"                           explorer.vim.
 "                   6.0.2 - Can't remember.
 "=============================================================================
 
@@ -42,14 +53,26 @@ endif
 
 let loaded_bufexplorer = 1
 
+if !hasmapto('<Plug>StartBufExplorer')
+  map <unique> <Leader>be <Plug>StartBufExplorer
+endif
+
+if !hasmapto('<Plug>SplitBufExplorer')
+  map <unique> <Leader>bs <Plug>SplitBufExplorer
+endif
+
+map <unique> <script> <Plug>StartBufExplorer :call <SID>StartBufExplorer(0)<CR>
+map <unique> <script> <Plug>SplitBufExplorer :call <SID>StartBufExplorer(1)<CR>
+
 " 
 " Create commands.
 " 
 if !exists(':BufExplorer')
-  command BufExplorer :call s:StartBufExplorer(0)
+  command BufExplorer :call <SID>StartBufExplorer(0)
 endif
+
 if !exists(':SBufExplorer')
-  command SBufExplorer :call s:StartBufExplorer(1)
+  command SBufExplorer :call <SID>StartBufExplorer(1)
 endif
 
 " 
@@ -72,9 +95,9 @@ endif
 
 if !exists("g:bufExplorerSortDirection")
   let g:bufExplorerSortDirection = 1
-  let w:sortDirLabel = ""
+  let s:sortDirLabel = ""
 else
-  let w:sortDirLabel = "reverse"
+  let s:sortDirLabel = "reverse"
 endif
 
 " Characters that must be escaped for a regular expression.
@@ -83,7 +106,7 @@ let s:escregexp = '/*^$.~\'
 " 
 " StartBufExplorer
 " 
-function! s:StartBufExplorer(split)
+function! <SID>StartBufExplorer(split)
   " Save the user's settings.
   let saveSplitBelow = &splitbelow
 
@@ -104,7 +127,7 @@ function! s:StartBufExplorer(split)
     let w:bufExplorerSplitWindow = 0
   endif
 
-  call s:DisplayBuffers()
+  call <SID>DisplayBuffers()
   
   " Restore the user's settings.
   let &splitbelow = saveSplitBelow
@@ -115,7 +138,7 @@ endfunction
 " 
 " DisplayBuffers.
 " 
-function! s:DisplayBuffers()
+function! <SID>DisplayBuffers()
   " Turn off the swapfile, set the buffer type so that it won't get written,
   " and so that it will get deleted when it gets hidden.
   setlocal modifiable
@@ -160,9 +183,9 @@ function! s:DisplayBuffers()
   " Delete all lines in buffer.
   1,$d _
 
-  call s:AddHeader()
+  call <SID>AddHeader()
   $ d
-  call s:ShowBuffers()
+  call <SID>ShowBuffers()
  
   normal! zz
 
@@ -178,7 +201,7 @@ endfunction
 " 
 " AddHeader.
 " 
-function! s:AddHeader()
+function! <SID>AddHeader()
   1
   if w:longHelp == 1
     let header = "\" Buffer Explorer\n"
@@ -192,7 +215,7 @@ function! s:AddHeader()
     let header = "\" Press ? for Help\n"
   endif
   
-  let header = header."\" Sorted by ".w:sortDirLabel.g:bufExplorerSortBy."\n"
+  let header = header."\" Sorted by ".s:sortDirLabel.g:bufExplorerSortBy."\n"
   let header = header."\"=\n"
   
   put! =header
@@ -203,7 +226,7 @@ endfunction
 " 
 " ShowBuffers.
 " 
-function! s:ShowBuffers()
+function! <SID>ShowBuffers()
   let oldRep = &report
   let save_sc = &showcmd
   let &report = 10000
@@ -227,7 +250,6 @@ function! s:ShowBuffers()
       " a name, process it.
       if(strlen(_BufName))
         if(matchstr(_BufName, "BufExplorer\]") == "")
-
           let len = strlen(_BufName)
           
           if len > s:maxFileLen
@@ -273,7 +295,7 @@ function! s:ShowBuffers()
 
   put =fileNames
 
-  call s:SortListing("")
+  call <SID>SortListing("")
   
   let &report = oldRep
   let &showcmd = save_sc
@@ -284,7 +306,7 @@ endfunction
 " 
 " SelectBuffer.
 " 
-function! s:SelectBuffer()
+function! <SID>SelectBuffer()
   let save_sc = &showcmd
   set noshowcmd 
   
@@ -297,7 +319,7 @@ function! s:SelectBuffer()
   endif
  
   " Skip over the readonly, modified indicators if there is any.
-  let _cfile = s:ExtractFileName(_cfile)
+  let _cfile = <SID>ExtractFileName(_cfile)
 
   if(strlen(_cfile))
     " Get the buffer number associated with this filename.
@@ -325,7 +347,7 @@ endfunction
 " 
 " Delete selected buffer from list.
 " 
-function! s:DeleteBuffer()
+function! <SID>DeleteBuffer()
   let oldRep = &report
   let &report = 10000
   let save_sc = &showcmd
@@ -334,6 +356,7 @@ function! s:DeleteBuffer()
   setlocal modifiable
   
   let _cfile = getline('.')
+  
   " Skip over the readonly, modified indicators if there is any.
   let _cfile = strpart(_cfile,4,strlen(_cfile))
   
@@ -356,7 +379,7 @@ endfunction
 " 
 " Back To Previous Buffer.
 "
-function! s:BackToPreviousBuffer()
+function! <SID>BackToPreviousBuffer()
   let save_sc = &showcmd
   set noshowcmd 
 
@@ -380,7 +403,7 @@ endfunction
 " 
 " Toggle between short and long help
 " 
-function! s:ToggleHelp()
+function! <SID>ToggleHelp()
   if exists("w:longHelp") && w:longHelp==0
     let w:longHelp=1
     let s:longHelp=1
@@ -391,7 +414,8 @@ function! s:ToggleHelp()
   
   " Allow modification
   setlocal modifiable
-  call s:UpdateHeader()
+  
+  call <SID>UpdateHeader()
   
   " Disallow modification
   setlocal nomodifiable
@@ -400,7 +424,7 @@ endfunction
 " 
 " Update the header
 " 
-function! s:UpdateHeader()
+function! <SID>UpdateHeader()
   let oldRep = &report
   let save_sc = &showcmd
   let &report = 10000
@@ -414,7 +438,7 @@ function! s:UpdateHeader()
   1,/^"=/ d
   
   " Add new header
-  call s:AddHeader()
+  call <SID>AddHeader()
   
   " Go back where we came from if possible.
   0
@@ -431,34 +455,34 @@ endfunction
 "
 " ExtractFileName
 "
-function! s:ExtractFileName(line)
+function! <SID>ExtractFileName(line)
   return strpart(a:line, 4, strlen(a:line))
 endfunction
 
 "
 " FileNameCmp
 "
-function! s:FileNameCmp(line1, line2, direction)
-  let f1 = s:ExtractFileName(a:line1)
-  let f2 = s:ExtractFileName(a:line2)
+function! <SID>FileNameCmp(line1, line2, direction)
+  let f1 = <SID>ExtractFileName(a:line1)
+  let f2 = <SID>ExtractFileName(a:line2)
   
-  return s:StrCmp(f1, f2, a:direction)
+  return <SID>StrCmp(f1, f2, a:direction)
 endfunction
 
 "
 " BufferNumberCmp
 "
-function! s:BufferNumberCmp(line1, line2, direction)
-  let f1 = bufnr(s:ExtractFileName(a:line1))
-  let f2 = bufnr(s:ExtractFileName(a:line2))
+function! <SID>BufferNumberCmp(line1, line2, direction)
+  let f1 = bufnr(<SID>ExtractFileName(a:line1))
+  let f2 = bufnr(<SID>ExtractFileName(a:line2))
 
-  return s:StrCmp(f1, f2, a:direction)
+  return <SID>StrCmp(f1, f2, a:direction)
 endfunction
 
 "
 " StrCmp - General string comparison function
 "
-function! s:StrCmp(line1, line2, direction)
+function! <SID>StrCmp(line1, line2, direction)
   if a:line1 < a:line2
     return -a:direction
   elseif a:line1 > a:line2
@@ -471,7 +495,7 @@ endfunction
 "
 " SortR() is called recursively.
 "
-function! s:SortR(start, end, cmp, direction)
+function! <SID>SortR(start, end, cmp, direction)
   " Bottom of the recursion if start reaches end
   if a:start >= a:end
     return
@@ -482,6 +506,7 @@ function! s:SortR(start, end, cmp, direction)
   let partStr = getline((a:start + a:end) / 2)
 
   let i = a:start
+  
   while (i <= a:end)
     let str = getline(i)
 
@@ -490,9 +515,11 @@ function! s:SortR(start, end, cmp, direction)
     if result <= 0
       " Need to put it before the partition.  Swap lines i and partition.
       let partition = partition + 1
+      
       if result == 0
         let middle = partition
       endif
+      
       if i != partition
         let str2 = getline(partition)
         call setline(i, str2)
@@ -513,35 +540,36 @@ function! s:SortR(start, end, cmp, direction)
     call setline(partition, str)
   endif
 
-  call s:SortR(a:start, partition - 1, a:cmp, a:direction)
-  call s:SortR(partition + 1, a:end, a:cmp, a:direction)
+  call <SID>SortR(a:start, partition - 1, a:cmp, a:direction)
+  call <SID>SortR(partition + 1, a:end, a:cmp, a:direction)
 endfunction
 
+"
 " Sort
 "
-function! s:Sort(cmp, direction) range
-  call s:SortR(a:firstline, a:lastline, a:cmp, a:direction)
+function! <SID>Sort(cmp, direction) range
+  call <SID>SortR(a:firstline, a:lastline, a:cmp, a:direction)
 endfunction
 
 "
 " SortReverse
 "
-function! s:SortReverse()
+function! <SID>SortReverse()
   if g:bufExplorerSortDirection == -1
     let g:bufExplorerSortDirection = 1
-    let w:sortDirLabel = ""
+    let s:sortDirLabel = ""
   else
     let g:bufExplorerSortDirection = -1
-    let w:sortDirLabel = "reverse "
+    let s:sortDirLabel = "reverse "
   endif
   
-  call s:SortListing("")
+  call <SID>SortListing("")
 endfunction
 
 "
 " SortSelect
 "
-function! s:SortSelect()
+function! <SID>SortSelect()
   " Select the next sort option
   if !exists("g:bufExplorerSortBy")
     let g:bufExplorerSortBy = "number"
@@ -551,13 +579,13 @@ function! s:SortSelect()
     let g:bufExplorerSortBy = "number"
   endif
   
-  call s:SortListing("")
+  call <SID>SortListing("")
 endfunction
 
 "
 " SortListing
 "
-function! s:SortListing(msg)
+function! <SID>SortListing(msg)
   " Save the line we start on so we can go back there when done sorting.
   let startline = getline(".")
   let col = col(".")
@@ -569,13 +597,13 @@ function! s:SortListing(msg)
   " Do the sort.
   0
   if g:bufExplorerSortBy == "number"
-    /^"=/+1,$call s:Sort("s:BufferNumberCmp", g:bufExplorerSortDirection)
+    /^"=/+1,$call <SID>Sort("<SID>BufferNumberCmp", g:bufExplorerSortDirection)
   else
-    /^"=/+1,$call s:Sort("s:FileNameCmp", g:bufExplorerSortDirection)
+    /^"=/+1,$call <SID>Sort("<SID>FileNameCmp", g:bufExplorerSortDirection)
   endif
 
   " Replace the header with updated information.
-  call s:UpdateHeader()
+  call <SID>UpdateHeader()
   
   " Return to the position we started at.
   0
@@ -594,5 +622,5 @@ endfunction
 " DoubleClick - Double click with the mouse.
 "
 function s:DoubleClick()
-  call s:SelectBuffer()
+  call <SID>SelectBuffer()
 endfun
