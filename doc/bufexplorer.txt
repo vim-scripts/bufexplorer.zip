@@ -1,4 +1,4 @@
-*bufexplorer.txt*  Buffer Explorer  November 28, 2001
+*bufexplorer.txt*  Buffer Explorer  December 17, 2001
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
 
@@ -6,6 +6,7 @@ Plugin for easilty exploring open buffers
 
 |bufexplorer-usage|          Usage
 |bufexplorer-customization|  Customization
+|add-local-help|             How to add this help file to vim's help
 |bufexplorer-changelog|      Change Log
 |bufexplorer-todo|           Todo
 |bufexplorer-credits|        Credits
@@ -29,7 +30,7 @@ Command to use once exploring:
  p             Toggles the showing of a split filename/pathname.
  q             Quit exploring.
  s             Selects the order the buffers are listed in. Either by their
-               name or by their number.
+               name, by their number or by most recently used.
  r             Reverses the order the buffers are listed in.
  ?             Displays help information.
 
@@ -61,6 +62,7 @@ The default is not to show detailed help.
 To control what field the buffers are sorted by, use:
   let g:bufExplorerSortBy='number'     " Sort by the buffer's number.
   let g:bufExplorerSortBy='name'       " Sort by the buffer's name.
+  let g:bufExplorerSortBy='mru'        " Sort by most recently used.
 The default is to sort by number.
                                                     *g:bufExplorerSplitBelow*
 To control where the new split window will be placed above or below the
@@ -82,6 +84,7 @@ To control whether to split out the path and file name or not, use:
 ===============================================================================
 Change Log                                              *bufexplorer-changelog*
 
+6.0.9 - Added MRU (Most Recently Used) sort ordering.
 6.0.8 - Was not resetting the showcmd command correctly.
         Added nifty help file.
 6.0.7 - Thanks to Brett Carlane for some great enhancements. Some are added,

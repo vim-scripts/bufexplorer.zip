@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta@yahoo.com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Tuesday, November 28, 2001
-"      Version: 6.0.8
+"  Last Change: Monday, December 17, 2001
+"      Version: 6.0.9
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -34,6 +34,11 @@ endif
 
 let loaded_bufexplorer = 1
 
+" Setup the global MRUList and the autocommand that modify it.
+let g:MRUList = ','
+au BufEnter * silent call <SID>MRUPush()
+au BufDelete * silent call <SID>MRUPop()
+
 if !hasmapto('<Plug>StartBufExplorer')
   map <unique> <Leader>be <Plug>StartBufExplorer
 endif
@@ -54,12 +59,14 @@ if !exists(':SBufExplorer')
   command SBufExplorer :call <SID>StartBufExplorer(1)
 endif
 
-" Show detailed help?
+" Show detailed help by default?
+" 0 = Don't show, 1 = Do show.
 if !exists("g:bufExplorerDetailedHelp")
   let g:bufExplorerDetailedHelp = 0
 endif
 
 " Field to sort by
+" Can by either 'number', 'name' or 'mru'.
 if !exists("g:bufExplorerSortBy")
   let g:bufExplorerSortBy = 'number'
 endif
@@ -79,6 +86,7 @@ else
 endif
 
 " Whether to split out the path and file name or not.
+" 0 = Don't split, 1 = Do split.
 if !exists("g:bufExplorerSplitOutPathName")
   let s:splitOutPathName = 1
 endif
@@ -153,6 +161,8 @@ function! <SID>DisplayBuffers()
   nnoremap <buffer> <silent> r :call <SID>SortReverse()<cr>
   nnoremap <buffer> <silent> ? :call <SID>ToggleHelp()<cr>
   nnoremap <buffer> <silent> <2-leftmouse> :call <SID>DoubleClick()<cr>
+
+  nnoremap <buffer> <silent> m :call <SID>MRUListShow()<cr>
 
   call <SID>ShowBuffers()
 
@@ -368,17 +378,14 @@ function! <SID>SelectBuffer()
     exec("b! ".s:curBufNbr)
     " Open the new buffer.
     exec("b! "._bufNbr)
+
+		call <SID>MRUPush()
   else
     setlocal modifiable
     d _
     setlocal nomodifiable
     echoerr "That buffer no longer exists, please select another"
   endif
-
-" TODO Not sure if this is needed anymore.
-"    if(@# != "" && (getbufvar('#', '&buflisted') == 1))
-"      exec("e #")
-"    endif
 
   let &showcmd = _showcmd
 
@@ -541,6 +548,17 @@ function! <SID>StrCmp(line1, line2, direction)
   endif
 endfunction
 
+" MRUCmp
+function! <SID>MRUCmp(line1, line2, direction)
+	let n1 = <SID>ExtractBufferNbr(a:line1)
+	let n2 = <SID>ExtractBufferNbr(a:line2)
+
+	let i1 = stridx(g:MRUList, ','.n1.',')
+	let i2 = stridx(g:MRUList, ','.n2.',')
+
+	return a:direction*(i1 - i2)
+endfunction
+
 " SortR() is called recursively.
 function! <SID>SortR(start, end, cmp, direction)
   " Bottom of the recursion if start reaches end
@@ -619,8 +637,10 @@ function! <SID>SortSelect()
   elseif g:bufExplorerSortBy == "number"
     let g:bufExplorerSortBy = "name"
   elseif g:bufExplorerSortBy == "name"
-    let g:bufExplorerSortBy = "number"
-  endif
+    let g:bufExplorerSortBy = "mru"
+	elseif g:bufExplorerSortBy == "mru"
+		let g:bufExplorerSortBy = "number"
+	endif
 
   call <SID>SaveCursorPosition()
   call <SID>SortListing()
@@ -637,8 +657,10 @@ function! <SID>SortListing()
   0
   if g:bufExplorerSortBy == "number"
     let cmpFunction = "<SID>BufferNumberCmp"
-  else
+  elseif g:bufExplorerSortBy == "name"
     let cmpFunction = "<SID>FileNameCmp"
+  else
+    let cmpFunction = "<SID>MRUCmp"
   endif
 
   /^"=/+1,$call <SID>Sort(cmpFunction, g:bufExplorerSortDirection)
@@ -667,4 +689,32 @@ endfunction
 " DoubleClick - Double click with the mouse.
 function! <SID>DoubleClick()
   call <SID>SelectBuffer()
+endfunction
+
+" MRUPush
+function! <SID>MRUPush()
+  if !buflisted(bufnr('%'))
+    return
+  end
+
+  let _bufNbr = bufnr('%')
+  "echomsg "Pushing ["._bufNbr."]"
+  let _list = substitute(g:MRUList, ','._bufNbr.',', ',', '')
+  let g:MRUList = ','._bufNbr._list
+  "echomsg "After Push, MRUList=[".g:MRUList."]"
+  unlet _bufNbr _list
+endfunction
+
+" MRUPop
+function! <SID>MRUPop()
+  let _bufNbr = expand('<abuf>')
+  "echomsg "Popping ["._bufNbr."]"
+  let g:MRUList = substitute(g:MRUList, ''._bufNbr.',', '', '')
+  "echomsg "After Pop, MRUList=[".g:MRUList."]"
+  unlet _bufNbr
+endfunction
+
+" MRUListShow
+function! <SID>MRUListShow()
+  echomsg "MRUList=[".g:MRUList."]"
 endfunction
