@@ -1,4 +1,4 @@
-*bufexplorer.txt*  Buffer Explorer  December 17, 2001
+*bufexplorer.txt*  Buffer Explorer  January 14, 2002
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
 
@@ -84,30 +84,34 @@ To control whether to split out the path and file name or not, use:
 ===============================================================================
 Change Log                                              *bufexplorer-changelog*
 
-6.0.9 - Added MRU (Most Recently Used) sort ordering.
-6.0.8 - Was not resetting the showcmd command correctly.
-        Added nifty help file.
-6.0.7 - Thanks to Brett Carlane for some great enhancements. Some are added,
-        some are not, yet. Added highlighting of current and alternate
-        filenames. Added spliting of path/filename toggle. Reworked
-        ShowBuffers().
-        Changed my email address.
-6.0.6 - Copyright notice added. Fixed problem with the SortListing() function
-        failing when there was only one buffer to display.
-6.0.5 - Fixed problems reported by David Pascoe, in that you where unable to
-        hit 'd' on a buffer that belonged to a files that nolonger existed
-        and that the 'yank' buffer was being overridden by the help text when
-        the bufexplorer was opened.
-6.0.4 - Thanks to Charles Campbell for making this plugin more plugin
-        *compliant*, adding default keymappings of <Leader>be and <Leader>bs
-        as well as fixing the 'w:sortDirLabel not being defined' bug.
-6.0.3 - Added sorting capabilities. Sort taken from explorer.vim.
-6.0.2 - Can't remember.
+6.0.10 - Added the necessary hooks so that the winmanager.vim script
+         could more easily integrate with this script.
+         Tried to improve performance.
+6.0.9  - Added MRU (Most Recently Used) sort ordering.
+6.0.8  - Was not resetting the showcmd command correctly.
+         Added nifty help file.
+6.0.7  - Thanks to Brett Carlane for some great enhancements. Some are added,
+         some are not, yet. Added highlighting of current and alternate
+         filenames. Added spliting of path/filename toggle. Reworked
+         ShowBuffers().
+         Changed my email address.
+6.0.6  - Copyright notice added. Fixed problem with the SortListing() function
+         failing when there was only one buffer to display.
+6.0.5  - Fixed problems reported by David Pascoe, in that you where unable to
+         hit 'd' on a buffer that belonged to a files that nolonger existed
+         and that the 'yank' buffer was being overridden by the help text when
+         the bufexplorer was opened.
+6.0.4  - Thanks to Charles Campbell for making this plugin more plugin
+         *compliant*, adding default keymappings of <Leader>be and <Leader>bs
+         as well as fixing the 'w:sortDirLabel not being defined' bug.
+6.0.3  - Added sorting capabilities. Sort taken from explorer.vim.
+6.0.2  - Can't remember.
+6.0.1  - Initial release.
 
 ===============================================================================
 Todo                                                         *bufexplorer-todo*
 
-None at this time.
+Improve performance even more.
 
 ===============================================================================
 Credits                                                   *bufexplorer-credits*

@@ -1,5 +1,5 @@
 "=============================================================================
-"    Copyright: Copyright (C) 2001 Jeff Lanzarotta
+"    Copyright: Copyright (C) 2001-2002 Jeff Lanzarotta
 "               Permission is hereby granted to use and distribute this code,
 "               with or without modifications, provided that this copyright
 "               notice is copied with it. Like anything else that's free,
@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta@yahoo.com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Monday, December 17, 2001
-"      Version: 6.0.9
+"  Last Change: Monday, January 14, 2001
+"      Version: 6.0.10
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -23,7 +23,6 @@
 "                 <Leader>bs  - Opens split windows BufExplorer
 "
 "               For more help see supplied documentation.
-"
 "      History: See supplied documentation.
 "=============================================================================
 
@@ -68,7 +67,7 @@ endif
 " Field to sort by
 " Can by either 'number', 'name' or 'mru'.
 if !exists("g:bufExplorerSortBy")
-  let g:bufExplorerSortBy = 'number'
+  let g:bufExplorerSortBy = 'mru'
 endif
 
 " When opening a new windows, split the new windows below or above the
@@ -88,47 +87,115 @@ endif
 " Whether to split out the path and file name or not.
 " 0 = Don't split, 1 = Do split.
 if !exists("g:bufExplorerSplitOutPathName")
-  let s:splitOutPathName = 1
+  let g:bufExplorerSplitOutPathName = 1
 endif
 
 " Characters that must be escaped for a regular expression.
 let s:escregexp = "/*^$.~\[]"
 let s:hideNames = "\\[[^\\]]*\\]"
 
+" -------- Stuff used for winmanager integration --------------
+let g:BufExplorer_title = "[Buf List]"
+
+if !exists("g:bufExplorerResize")
+  let g:bufExplorerResize = 1
+endif
+
+" Function to start display.
+" set the mode to "winmanager" for this buffer. this is to figure out how this
+" plugin was called. in a standalone fashion or by winmanager.
+function! BufExplorer_Start()
+  let b:displayMode = "winmanager"
+  call s:StartBufExplorer(0)
+endfunction
+
+" Returns whether the display is okay or not.
+function! BufExplorer_IsValid()
+  return 0
+endfunction
+
+" Handles dynamic refreshing of the window.
+function! BufExplorer_Refresh()
+  let b:displayMode = "winmanager"
+  call s:StartBufExplorer(0)
+endfunction
+
+" Handles dynamic resizing of the window.
+if !exists('g:bufExplorerMaxHeight')
+  let g:bufExplorerMaxHeight = 25
+end
+
+" BufExplorer_ReSize.
+function! BufExplorer_ReSize()
+  if !g:bufExplorerResize
+    return
+  end
+
+  let nlines = line('$')
+
+  if nlines > g:bufExplorerMaxHeight
+    let nlines = g:bufExplorerMaxHeight
+  end
+
+  exe nlines.' wincmd _'
+
+  " The following lines restore the layout so that the last file line is also
+  " the last window line. sometimes, when a line is deleted, although the
+  " window size is exactly equal to the number of lines in the file, some of
+  " the lines are pushed up and we see some lagging '~'s.
+  let presRow = line('.')
+  let presCol = virtcol('.')
+  exe $
+  let _scr = &scrolloff
+  let &scrolloff = 0
+  normal! z-
+  let &scrolloff = _scr
+  exe presRow
+  exe 'normal! '.presCol.'|'
+endfunction
+" --- End winmanager integration specific stuff ------------
+
 " StartBufExplorer
 function! <SID>StartBufExplorer(split)
+  if <SID>DoAnyMoreBuffersExist() == 0
+    echomsg "There are no more buffers to be explored"
+    return
+  endif
+
   let _splitbelow = &splitbelow
 
   " Save current and alternate buffer numbers for later.
-  let s:curBufNbr = bufnr("%")
-  let s:altBufNbr = bufnr("#")
+  let s:curBufNbr = <SID>MRUGet(1)
+  let s:altBufNbr = <SID>MRUGet(2)
 
-  " Set to our new values.
   let &splitbelow = g:bufExplorerSplitBelow
 
-  if a:split || (&modified && &hidden == 0)
-    if has("win32")
-      sp [BufExplorer]
-    else
-      sp \[BufExplorer\]
-    endif
+  " When this function is used by winmanager, the focus is already given to
+  " the window in which to display the buffer list. the edit commands lead to
+  " errors because multiple buffers are opened for displaying one buffer list.
+  if !exists("b:displayMode") || b:displayMode != "winmanager"
+    if a:split || (&modified && &hidden == 0)
+      if has("win32")
+        sp [BufExplorer]
+      else
+        sp \[BufExplorer\]
+      endif
 
-    let s:bufExplorerSplitWindow = 1
-  else
-    if has("win32")
-      e [BufExplorer]
+      let s:bufExplorerSplitWindow = 1
     else
-      e \[BufExplorer\]
-    endif
+      if has("win32")
+        e [BufExplorer]
+      else
+        e \[BufExplorer\]
+      endif
 
-    let s:bufExplorerSplitWindow = 0
+      let s:bufExplorerSplitWindow = 0
+    endif
   endif
 
   call <SID>DisplayBuffers()
 
   let &splitbelow = _splitbelow
-
-  unlet _splitbelow
 endfunction
 
 " DisplayBuffers.
@@ -147,32 +214,29 @@ function! <SID>DisplayBuffers()
     call <SID>SetupSyntax()
   endif
 
-  if exists("s:longHelp")
-    let w:longHelp = s:longHelp
-  else
-    let w:longHelp = g:bufExplorerDetailedHelp
+  if exists("b:displayMode") && b:displayMode == "winmanager"
+    nnoremap <buffer> <silent> <tab> :call <SID>SelectBuffer(1)<cr>
   endif
 
-  nnoremap <buffer> <silent> <cr> :call <SID>SelectBuffer()<cr>
+  nnoremap <buffer> <silent> ? :call <SID>ToggleHelp()<cr>
+  nnoremap <buffer> <silent> <2-leftmouse> :call <SID>SelectBuffer(0)<cr>
+  nnoremap <buffer> <silent> <cr> :call <SID>SelectBuffer(0)<cr>
   nnoremap <buffer> <silent> d :call <SID>DeleteBuffer()<cr>
+  nnoremap <buffer> <silent> m :call <SID>MRUListShow()<cr>
   nnoremap <buffer> <silent> p :call <SID>ToggleSplitOutPathName()<cr>
   nnoremap <buffer> <silent> q :call <SID>BackToPreviousBuffer()<cr>
-  nnoremap <buffer> <silent> s :call <SID>SortSelect()<cr>
   nnoremap <buffer> <silent> r :call <SID>SortReverse()<cr>
-  nnoremap <buffer> <silent> ? :call <SID>ToggleHelp()<cr>
-  nnoremap <buffer> <silent> <2-leftmouse> :call <SID>DoubleClick()<cr>
-
-  nnoremap <buffer> <silent> m :call <SID>MRUListShow()<cr>
+  nnoremap <buffer> <silent> s :call <SID>SortSelect()<cr>
 
   call <SID>ShowBuffers()
 
-  normal! zz
+  if !g:bufExplorerResize
+    normal! zz
+  end
 
   setlocal nomodifiable
 
   let &showcmd = _showcmd
-
-  unlet! _showcmd
 endfunction
 
 " SetupSyntax.
@@ -230,14 +294,15 @@ endif
 " AddHeader.
 function! <SID>AddHeader()
   1
-  if w:longHelp == 1
+  if g:bufExplorerDetailedHelp == 1
     let header = "\" Buffer Explorer\n"
     let header = header."\" ----------------\n"
     let header = header."\" <enter> or Mouse-Double-Click : open buffer under cursor\n"
     let header = header."\" d : delete buffer\n"
     let header = header."\" p : toggle spliting of file and path name\n"
     let header = header."\" q : quit the Buffer Explorer\n"
-    let header = header."\" s : select sort field    r : reverse sort\n"
+    let header = header."\" s : select sort field\n"
+    let header = header."\" r : reverse sort\n"
     let header = header."\" ? : toggle this help\n"
   else
     let header = "\" Press ? for Help\n"
@@ -247,8 +312,6 @@ function! <SID>AddHeader()
   let header = header."\"=\n"
 
   put! =header
-
-  unlet header
 endfunction
 
 " ShowBuffers.
@@ -263,7 +326,7 @@ function! <SID>ShowBuffers()
 
   $ d _
   " Prevent odd huge indent when first invoked.
-  normal 0
+  normal! 0
 
   let a_save = @a
 
@@ -297,29 +360,25 @@ function! <SID>ShowBuffers()
       let filenames = substitute(filenames, "\\(\\%(^\\|\n\\)\\s*\\d\\+\\%( \\|u\\)\\)#", "\\1 ", "")
       let filenames = substitute(filenames, "\\(\\%(^\\|\n\\)\\s*" . s:altBufNbr . "\\%( \\|u\\)\\).", "\\1#", "")
     endif
-  else
-    let filenames = "\" No buffers to display!"
   endif
 
   " Get the line number of the last line of the header + 1.
-  let firstLine = line(".") + 1
+  let _lineNbr = line(".") + 1
 
   put = filenames
 
-  if s:splitOutPathName
-    execute firstLine . ",$call <SID>SplitOutPathName()"
+  if g:bufExplorerSplitOutPathName
+    execute _lineNbr . ",$call <SID>SplitOutPathName()"
   endif
 
   call <SID>SortListing()
 
   let &report = _report
-
-  unlet! filenames _report firstLine
 endfunction
 
 " SplitOutPathName.
 function! <SID>SplitOutPathName() range
-  if a:firstline != a:lastline
+  if a:lastline >= a:firstline
     let maxlen = 0
     let scanline = a:firstline
     let leaderlen = strlen(matchstr(getline("."), "^\\s*\\d\\+.\\{6}"))
@@ -357,39 +416,40 @@ function! <SID>SplitOutPathName() range
 endfunction
 
 " SelectBuffer.
-function! <SID>SelectBuffer()
+function! <SID>SelectBuffer(...)
   let _showcmd = &showcmd
   set noshowcmd
 
   let _line = getline('.')
 
   " Are we on a line with a file name?
-  if _line =~'^"'
-    unlet _line
-    return
-  endif
+  if _line !~'^"'
+    let _bufNbr = <SID>ExtractBufferNbr(_line)
 
-  " let _cfile = <SID>ExtractFileName(_cfile)
-  let _bufNbr = <SID>ExtractBufferNbr(_line)
-  if bufexists(_bufNbr) != 0
-    " Switch to the previously open buffer. This sets the alternate file
-    " to the correct one, so that when we switch to the new buffer, the
-    " alternate buffer is correct.
-    exec("b! ".s:curBufNbr)
-    " Open the new buffer.
-    exec("b! "._bufNbr)
+    if exists("b:displayMode") && b:displayMode == "winmanager"
+      let bufname = expand("#"._bufNbr.":p")
+      call WinManagerFileEdit(bufname, a:1)
+      return
+    end
 
-		call <SID>MRUPush()
-  else
-    setlocal modifiable
-    d _
-    setlocal nomodifiable
-    echoerr "That buffer no longer exists, please select another"
+    if bufexists(_bufNbr) != 0
+      " Switch to the previously open buffer. This sets the alternate file
+      " to the correct one, so that when we switch to the new buffer, the
+      " alternate buffer is correct.
+      exec("b! ".s:curBufNbr)
+      " Open the new buffer.
+      exec("b! "._bufNbr)
+
+      call <SID>MRUPush()
+    else
+      setlocal modifiable
+      d _
+      setlocal nomodifiable
+      echoerr "That buffer no longer exists, please select another"
+    endif
   endif
 
   let &showcmd = _showcmd
-
-  unlet! _line _bufNbr _showcmd
 endfunction
 
 " Delete selected buffer from list.
@@ -403,15 +463,24 @@ function! <SID>DeleteBuffer()
 
   let _bufNbr = <SID>ExtractBufferNbr(getline('.'))
 
+  " These commands are to temporarily suspend the activity of winmanager.
+  if exists("b:displayMode") && b:displayMode == "winmanager"
+    call WinManagerSuspendAUs()
+  end
+
   exec("bd "._bufNbr)
   d _
+
+  " Reactivate winmanager autocommand activity.
+  if exists("b:displayMode") && b:displayMode == "winmanager"
+    call WinManagerForceReSize("BufExplorer")
+    call WinManagerResumeAUs()
+  end
 
   setlocal nomodifiable
 
   let &report = _report
   let &showcmd = _showcmd
-
-  unlet _bufNbr _report _showcmd
 endfunction
 
 " Back To Previous Buffer.
@@ -419,27 +488,23 @@ function! <SID>BackToPreviousBuffer()
   let _showcmd = &showcmd
   set noshowcmd
 
-  if(s:bufExplorerSplitWindow == 1)
+  if s:bufExplorerSplitWindow == 1
     exec("silent! close!")
   endif
 
-  let switched = 0
+  let _switched = 0
 
-  if(s:altBufNbr != -1)
-    if filereadable(bufname(s:altBufNbr))
-      exec("b! ".s:altBufNbr)
-      let switched = 1
-    endif
+  if s:altBufNbr > 0
+    exec("b! ".s:altBufNbr)
+    let switched = 1
   endif
 
-  if(s:curBufNbr != -1)
-    if filereadable(bufname(s:curBufNbr))
-      exec("b! ".s:curBufNbr)
-      let switched = 1
-    endif
+  if s:curBufNbr > 0
+    exec("b! ".s:curBufNbr)
+    let _switched = 1
   endif
 
-  if switched == 0
+  if _switched == 0
     if s:bufExplorerSplitWindow == 1 && bufwinnr("$") > 1
       new
     else
@@ -448,28 +513,28 @@ function! <SID>BackToPreviousBuffer()
   endif
 
   let &showcmd = _showcmd
-
-  unlet _showcmd
 endfunction
 
 " Toggle between short and long help
 function! <SID>ToggleHelp()
-  if exists("w:longHelp") && w:longHelp==0
-    let w:longHelp=1
-    let s:longHelp=1
+  if g:bufExplorerDetailedHelp == 0
+    let g:bufExplorerDetailedHelp = 1
   else
-    let w:longHelp=0
-    let s:longHelp=0
+    let g:bufExplorerDetailedHelp = 0
   endif
 
   call <SID>UpdateHeader()
+
+  if exists("b:displayMode") && b:displayMode == "winmanager"
+    call WinManagerForceReSize("BufExplorer")
+  end
 endfunction
 
 " ToggleSplitOutPathName
 function! <SID>ToggleSplitOutPathName()
   let _showcmd = &showcmd
   set noshowcmd
-  let s:splitOutPathName = !s:splitOutPathName
+  let g:bufExplorerSplitOutPathName = !g:bufExplorerSplitOutPathName
   setlocal modifiable
 
   call <SID>SaveCursorPosition()
@@ -478,7 +543,6 @@ function! <SID>ToggleSplitOutPathName()
 
   setlocal nomodifiable
   let &showcmd = _showcmd
-  unlet! _showcmd
 endfunction
 
 " Update the header
@@ -509,8 +573,6 @@ function! <SID>UpdateHeader()
   let &showcmd = _showcmd
 
   setlocal nomodifiable
-
-  unlet _report _showcmd
 endfunction
 
 " ExtractFileName
@@ -550,13 +612,20 @@ endfunction
 
 " MRUCmp
 function! <SID>MRUCmp(line1, line2, direction)
-	let n1 = <SID>ExtractBufferNbr(a:line1)
-	let n2 = <SID>ExtractBufferNbr(a:line2)
+  let n1 = <SID>ExtractBufferNbr(a:line1)
+  let n2 = <SID>ExtractBufferNbr(a:line2)
 
-	let i1 = stridx(g:MRUList, ','.n1.',')
-	let i2 = stridx(g:MRUList, ','.n2.',')
+  let i1 = stridx(g:MRUList, ','.n1.',')
+  let i2 = stridx(g:MRUList, ','.n2.',')
 
-	return a:direction*(i1 - i2)
+  " Compare the indices only if they are both in the MRU. Ootherwise, if one
+  " of the buffer numbers is not in the mru list, define define the other as
+  " the 'smaller'. If both buffers are not in the mru list, then compare their
+  " buffer numbers.
+  let val = a:direction*(i1 - i2)*(i1 != -1 && i2 != -1)
+        \ - a:direction*( (i1 != -1 && i2 == -1) - (i1 == -1 && i2 != -1) )
+        \ + a:direction*(i1 == -1 && i2 == -1)*(n1 - n2)
+  return val
 endfunction
 
 " SortR() is called recursively.
@@ -572,7 +641,7 @@ function! <SID>SortR(start, end, cmp, direction)
 
   let i = a:start
 
-  while (i <= a:end)
+  while i <= a:end
     let str = getline(i)
 
     exec "let result = " . a:cmp . "(str, partStr, " . a:direction . ")"
@@ -631,16 +700,15 @@ endfunction
 
 " SortSelect
 function! <SID>SortSelect()
-  " Select the next sort option
   if !exists("g:bufExplorerSortBy")
     let g:bufExplorerSortBy = "number"
   elseif g:bufExplorerSortBy == "number"
     let g:bufExplorerSortBy = "name"
   elseif g:bufExplorerSortBy == "name"
     let g:bufExplorerSortBy = "mru"
-	elseif g:bufExplorerSortBy == "mru"
-		let g:bufExplorerSortBy = "number"
-	endif
+  elseif g:bufExplorerSortBy == "mru"
+    let g:bufExplorerSortBy = "number"
+  endif
 
   call <SID>SaveCursorPosition()
   call <SID>SortListing()
@@ -653,7 +721,6 @@ function! <SID>SortListing()
 
   setlocal modifiable
 
-  " Do the sort.
   0
   if g:bufExplorerSortBy == "number"
     let cmpFunction = "<SID>BufferNumberCmp"
@@ -665,13 +732,10 @@ function! <SID>SortListing()
 
   /^"=/+1,$call <SID>Sort(cmpFunction, g:bufExplorerSortDirection)
 
-  " Replace the header with updated information.
   call <SID>UpdateHeader()
 
   setlocal nomodified
   setlocal nomodifiable
-
-  unlet startline cmpFunction
 endfunction
 
 " SaveCursorPosition
@@ -686,11 +750,6 @@ function! <SID>RestoreCursorPosition()
   execute "normal! " . s:curColumn . "|"
 endfunction
 
-" DoubleClick - Double click with the mouse.
-function! <SID>DoubleClick()
-  call <SID>SelectBuffer()
-endfunction
-
 " MRUPush
 function! <SID>MRUPush()
   if !buflisted(bufnr('%'))
@@ -698,23 +757,51 @@ function! <SID>MRUPush()
   end
 
   let _bufNbr = bufnr('%')
-  "echomsg "Pushing ["._bufNbr."]"
   let _list = substitute(g:MRUList, ','._bufNbr.',', ',', '')
   let g:MRUList = ','._bufNbr._list
-  "echomsg "After Push, MRUList=[".g:MRUList."]"
-  unlet _bufNbr _list
 endfunction
 
 " MRUPop
 function! <SID>MRUPop()
   let _bufNbr = expand('<abuf>')
-  "echomsg "Popping ["._bufNbr."]"
   let g:MRUList = substitute(g:MRUList, ''._bufNbr.',', '', '')
-  "echomsg "After Pop, MRUList=[".g:MRUList."]"
-  unlet _bufNbr
+endfunction
+
+" MRUGet
+function! <SID>MRUGet(slot)
+  let _bufNbr = (matchstr(g:MRUList, '\(\([^,]*,\)\{'.a:slot.'}\)\@<=[^,]*'))
+
+  if _bufNbr == ''
+    return -1
+  end
+
+  return _bufNbr
 endfunction
 
 " MRUListShow
 function! <SID>MRUListShow()
   echomsg "MRUList=[".g:MRUList."]"
 endfunction
+
+" DoAnyMoreBuffersExist
+function! <SID>DoAnyMoreBuffersExist()
+  let nBuffers = bufnr("$")
+  let i = 0
+  let x = 0
+
+  while i <= nBuffers
+    let i = i + 1
+
+    if getbufvar(i, '&buflisted') == 1
+      let x = x + 1
+
+      if x > 1
+        return 1
+      endif
+    endif
+  endwhile
+
+  return 0
+endfunction
+
+" vim:sw=2:ts=2:et
