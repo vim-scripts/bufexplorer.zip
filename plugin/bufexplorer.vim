@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Monday, 28 April 2003
-"      Version: 6.1.5
+"  Last Change: Monday, 05 May 2003
+"      Version: 6.1.6
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -67,17 +67,9 @@ if !exists(":VSBufExplorer")
 endif
 
 " Public Interfaces
-if !hasmapto("<Plug>StartBufExplorer")
-  map <silent> <unique> <Leader>be :BufExplorer<CR>
-endif
-
-if !hasmapto("<Plug>SplitBufExplorer")
-  map <silent> <unique> <Leader>bs :SBufExplorer<CR>
-endif
-
-if !hasmapto("<Plug>VerticalSplitBufExplorer")
-  map <silent> <unique> <Leader>bv :VSBufExplorer<CR>
-endif
+map <silent> <unique> <Leader>be :BufExplorer<CR>
+map <silent> <unique> <Leader>bs :SBufExplorer<CR>
+map <silent> <unique> <Leader>bv :VSBufExplorer<CR>
 
 " Show default help? If you set this to 0, you're on your own remembering that
 " '?' brings up the help and what the sort order is.
@@ -313,7 +305,6 @@ function! <SID>DisplayBuffers()
   nnoremap <buffer> <silent> m :call <SID>MRUListShow()<cr>
   nnoremap <buffer> <silent> p :call <SID>ToggleSplitOutPathName()<cr>
   nnoremap <buffer> <silent> q :call <SID>BackToPreviousBuffer()<cr>
-  nnoremap <buffer> <silent> <esc> :call <SID>BackToPreviousBuffer()<cr>
   nnoremap <buffer> <silent> r :call <SID>SortReverse()<cr>
   nnoremap <buffer> <silent> s :call <SID>SortSelect()<cr>
 
@@ -399,7 +390,7 @@ function! <SID>AddHeader()
     endif
 
     let header = header."\" p : toggle spliting of file and path name\n"
-    let header = header."\" q or <esc> : quit the Buffer Explorer\n"
+    let header = header."\" q : quit the Buffer Explorer\n"
     let header = header."\" s : select sort field\n"
 
     if s:bufExplorerSplitWindow == 1
