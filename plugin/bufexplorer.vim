@@ -1,5 +1,5 @@
 "=============================================================================
-"    Copyright: Copyright (C) 2001-2003 Jeff Lanzarotta
+"    Copyright: Copyright (C) 2001-2004 Jeff Lanzarotta
 "               Permission is hereby granted to use and distribute this code,
 "               with or without modifications, provided that this copyright
 "               notice is copied with it. Like anything else that's free,
@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Thursday, 09 October 2003
-"      Version: 6.2.1
+"  Last Change: Thursday, 08 January 2004
+"      Version: 6.2.2
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -210,6 +210,7 @@ function! <SID>Initialize()
 
   setlocal nonumber
   setlocal foldcolumn=0
+  setlocal nofoldenable
 
   let s:_splitType = g:bufExplorerSplitType
 
