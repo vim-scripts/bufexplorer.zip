@@ -1,4 +1,4 @@
-*bufexplorer.txt*  Buffer Explorer  Last Change: February 05, 2002
+*bufexplorer.txt*  Buffer Explorer  Last Change: February 19, 2002
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
 
@@ -31,10 +31,12 @@ Command to use once exploring:
  <cr> or       Opens the buffer that is under the cursor into the current
  <leftmouse>   window.
  d             Deletes the buffer from the list that is under the cursor.
+ o             Toggles open mode. Only available in 'split mode'.
  p             Toggles the showing of a split filename/pathname.
  q             Quit exploring.
  s             Selects the order the buffers are listed in. Either by their
                name, by their number or by most recently used.
+ t             Toggles split type. Only available in 'split mode'.
  r             Reverses the order the buffers are listed in.
  ?             Displays help information.
 
@@ -68,30 +70,47 @@ To control what field the buffers are sorted by, use: >
   let g:bufExplorerSortBy='number'     " Sort by the buffer's number.
   let g:bufExplorerSortBy='name'       " Sort by the buffer's name.
   let g:bufExplorerSortBy='mru'        " Sort by most recently used.
-The default is to sort by number.
+The default is to sort by mru.
 
                                                       *g:bufExplorerSplitBelow*
 To control where the new split window will be placed above or below the
 current window, use: >
   let g:bufExplorerSplitBelow=1        " Split new window below current.
   let g:bufExplorerSplitBelow=0        " Split new window above current.
-The default it to use what ever is set by the global &splitbelow
+The default is to use what ever is set by the global &splitbelow
 variable.
+
+                                                       *g:bufExplorerSplitType*
+To control the type of split when creating a new window, use: >
+  let g:bufExplorerSplitType=''        " Split horizontally.
+  let g:bufExplorerSplitType='v'       " Split vertically.
+The default is to split horizontally.
+
+                                                        *g:bufExplorerOpenMode*
+To control how the selected buffer is opened in 'split mode', use: >
+  let g:bufExplorerOpenMode=1       " Open using current window.
+  let g:bufExplorerOpenMode=0       " Open in new window.
+The default is to use a new window.
 
                                                    *g:bufExplorerSortDirection*
 To control whether to sort the buffers in forward or reverse order, use: >
   let g:bufExplorerSortDirection=1     " Sort in forward order.
   let g:bufExplorerSortDirection=-1    " Sort in reverse order.
+The default is to sort forwards.
 
                                                 *g:bufExplorerSplitOutPathName*
 To control whether to split out the path and file name or not, use: >
   let g:bufExplorerSplitOutPathName=1  " Split the path and file name.
   let g:bufExplorerSplitOutPathName=-1 " Don't split the path and file
                                        " name.
+The default is to split the path and file name.
 
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.0.14 - Fix a yew more bug that I thought I already had fixed. Thanks
+         to Eric Bloodworth for adding 'Open Mode/Edit in Place'. Added
+         vertical splitting.
 6.0.13 - Thanks to Charles E Campbell, Jr. for pointing out some embarrassing
          typos that I had in the documentation. I guess I need to run
          the spell checker more :o)
@@ -110,7 +129,8 @@ CHANGE LOG                                              *bufexplorer-changelog*
          filenames. Added splitting of path/filename toggle. Reworked
          ShowBuffers().
          Changed my email address.
-6.0.6  - Copyright notice added. Fixed problem with the SortListing() function
+6.0.6  - Copyright notice added. Needed this so that it could be distributed
+         with Debian Linux. Fixed problem with the SortListing() function
          failing when there was only one buffer to display.
 6.0.5  - Fixed problems reported by David Pascoe, in that you where unable to
          hit 'd' on a buffer that belonged to a files that no longer existed
