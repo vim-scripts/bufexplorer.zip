@@ -9,10 +9,10 @@
 "               resulting from the use of this software.
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
-"   Maintainer: Jeff Lanzarotta (jefflanzarotta@yahoo.com)
+"   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Wednesday, February 20, 2002
-"      Version: 6.0.15
+"  Last Change: Thursday, March 14, 2002
+"      Version: 6.0.16
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -40,6 +40,8 @@ augroup bufexplorer
   autocmd!
   autocmd BufEnter * silent call <SID>MRUPush()
   autocmd BufDelete * silent call <SID>MRUPop()
+  autocmd BufEnter *BufExplorer* silent call <SID>Initialize()
+  autocmd BufLeave *BufExplorer* silent call <SID>Cleanup()
 augroup End
 
 " Create commands.
@@ -172,6 +174,25 @@ function! BufExplorer_ReSize()
 endfunction
 " --- End winmanager integration specific stuff ------------
 
+" Initialize
+function! <SID>Initialize()
+  let s:_insertmode = &insertmode
+  set noinsertmode
+
+  let s:_showcmd = &showcmd
+  set noshowcmd
+
+  let s:_report = &report
+  let &report = 10000
+endfunction
+
+" Cleanup
+function! <SID>Cleanup()
+  let &insertmode = s:_insertmode
+  let &showcmd = s:_showcmd
+  let &report = s:_report
+endfunction
+
 " StartBufExplorer
 function! <SID>StartBufExplorer(split)
   if <SID>DoAnyMoreBuffersExist() == 0
@@ -214,15 +235,11 @@ endfunction
 
 " DisplayBuffers.
 function! <SID>DisplayBuffers()
-  let _showcmd = &showcmd
-
   setlocal bufhidden=delete
   setlocal buftype=nofile
   setlocal modifiable
   setlocal noswapfile
   setlocal nowrap
-
-  set noshowcmd
 
   if has('syntax')
     call <SID>SetupSyntax()
@@ -255,8 +272,6 @@ function! <SID>DisplayBuffers()
   endif
 
   setlocal nomodifiable
-
-  let &showcmd = _showcmd
 endfunction
 
 " SetupSyntax.
@@ -365,9 +380,6 @@ endfunction
 
 " ShowBuffers.
 function! <SID>ShowBuffers()
-  let _report = &report
-  let &report = 10000
-
   " Delete all lines in buffer.
   silent 1,$d _
 
@@ -421,8 +433,6 @@ function! <SID>ShowBuffers()
   endif
 
   call <SID>SortListing()
-
-  let &report = _report
 endfunction
 
 " SplitOutPathName.
@@ -471,9 +481,6 @@ function! <SID>SelectBuffer(...)
     return
   endif
 
-  let _showcmd = &showcmd
-  set noshowcmd
-
   let _bufNbr = <SID>ExtractBufferNbr(getline('.'))
 
   if exists("b:displayMode") && b:displayMode == "winmanager"
@@ -484,7 +491,7 @@ function! <SID>SelectBuffer(...)
 
   if bufexists(_bufNbr) != 0
     if g:bufExplorerOpenMode == 1 && s:bufExplorerSplitWindow == 1
-      silent! bd!  
+      silent! bd!
     endif
 
     " Switch to the previously open buffer. This sets the alternate file
@@ -500,8 +507,6 @@ function! <SID>SelectBuffer(...)
     setlocal nomodifiable
     echoerr "That buffer no longer exists, please select another"
   endif
-
-  let &showcmd = _showcmd
 endfunction
 
 " Delete selected buffer from list.
@@ -510,11 +515,6 @@ function! <SID>DeleteBuffer()
     return
   endif
 
-  let _report = &report
-  let _showcmd = &showcmd
-  let &report = 10000
-  set noshowcmd
-  
   setlocal modifiable
 
   let _bufNbr = <SID>ExtractBufferNbr(getline('.'))
@@ -534,16 +534,10 @@ function! <SID>DeleteBuffer()
   end
 
   setlocal nomodifiable
-
-  let &report = _report
-  let &showcmd = _showcmd
 endfunction
 
 " Back To Previous Buffer.
 function! <SID>BackToPreviousBuffer()
-  let _showcmd = &showcmd
-  set noshowcmd
-
   if s:bufExplorerSplitWindow == 1
     exec("silent! close!")
   endif
@@ -567,8 +561,6 @@ function! <SID>BackToPreviousBuffer()
       enew
     endif
   endif
-
-  let &showcmd = _showcmd
 endfunction
 
 " Toggle between short and long help
@@ -584,8 +576,6 @@ endfunction
 
 " ToggleSplitOutPathName
 function! <SID>ToggleSplitOutPathName()
-  let _showcmd = &showcmd
-  set noshowcmd
   let g:bufExplorerSplitOutPathName = !g:bufExplorerSplitOutPathName
   setlocal modifiable
 
@@ -594,7 +584,6 @@ function! <SID>ToggleSplitOutPathName()
   call <SID>RestoreCursorPosition()
 
   setlocal nomodifiable
-  let &showcmd = _showcmd
 endfunction
 
 " ToggleOpenMode
@@ -615,10 +604,6 @@ endfunction
 
 " Update the header
 function! <SID>UpdateHeader()
-  let _report = &report
-  let _showcmd = &showcmd
-  let &report = 10000
-  set noshowcmd
   setlocal modifiable
 
   " Save position
@@ -636,9 +621,6 @@ function! <SID>UpdateHeader()
   if line("'Z") != 0
     normal! `Z
   endif
-
-  let &report = _report
-  let &showcmd = _showcmd
 
   setlocal nomodifiable
 endfunction
