@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Monday, 05 May 2003
-"      Version: 6.1.6
+"  Last Change: Friday, 13 June 2003
+"      Version: 6.2.0
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -479,6 +479,7 @@ function! <SID>ShowBuffers()
 
   " Remove any blank lines.
   silent! g/^\s*$/d
+  call <SID>CleanUpHistory()
 
   if g:bufExplorerSplitOutPathName
     exe _lineNbr.",$call <SID>SplitOutPathName()"
@@ -669,7 +670,7 @@ function! <SID>UpdateHeader()
   call <SID>CleanUpHistory()
   call <SID>AddHeader()
 
-  " Go back where we came from if possible.
+  " Jump back where we came from if possible.
   0
   if line("'Z") != 0
     normal! `Z

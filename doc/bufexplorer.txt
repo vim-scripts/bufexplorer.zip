@@ -1,7 +1,7 @@
-*bufexplorer.txt*          Buffer Explorer          Last Change: 05 May 2003
+*bufexplorer.txt*          Buffer Explorer          Last Change: 13 June 2003
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                              Version 6.1.6
+                              Version 6.2.0
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -111,6 +111,9 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.2.0  - Thanks goes out to Simon Johann-Günter for spotting and fixing a
+         problem in that the last search pattern is overriden by the search
+         pattern for blank lines.
 6.1.6  - Thanks to Artem Chuprina for finding a pesky bug that has been around
          for sometime now. The <esc> key mapping was causing the buffer
          explored to close prematurely when vim was run in an xterm. The <esc>
