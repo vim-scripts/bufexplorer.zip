@@ -1,7 +1,7 @@
-*bufexplorer.txt*  Buffer Explorer  Last Change: March 25, 2002
+*bufexplorer.txt*  Buffer Explorer  Last Change: 05 November 2002
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                              Version 6.1.1
+                              Version 6.1.2
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -34,7 +34,7 @@ Command to use once exploring:
  d             Deletes the buffer from the list that is under the cursor.
  o             Toggles open mode. Only available in 'split mode'.
  p             Toggles the showing of a split filename/pathname.
- q             Quit exploring.
+ <esc> or q    Quit exploring.
  s             Selects the order the buffers are listed in. Either by their
                name, by their number or by most recently used.
  t             Toggles split type. Only available in 'split mode'.
@@ -109,6 +109,13 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.1.2  - Now pressing the <esc> key will quit, just like 'q'.
+         Added folds to hide winmanager configuration.
+         If anyone had the 'C' option in their cpoptions they would receive
+         a E10 error on startup of BufExplorer. cpo is now saved, updated and
+         restored. Thanks to Charles E Campbell, Jr.
+         Attempted to make sure there can only be one BufExplorer window open
+         at a time.
 6.1.1  - Thanks to Brian D. Goodwin for adding toupper to FileNameCmp. This
          way buffers sorted by name will be in the correct order regardless of
          case.

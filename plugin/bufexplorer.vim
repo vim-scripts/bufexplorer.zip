@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Monday, March 25, 2002
-"      Version: 6.1.1
+"  Last Change: Tuesday, 05 November 2002
+"      Version: 6.1.2
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -109,11 +109,16 @@ if !exists('g:bufExplorerSplitOutPathName')
   let g:bufExplorerSplitOutPathName = 1
 endif
 
+" Used to make sure that only one BufExplorer is open at a time.
+if !exists('g:bufExplorerRunning')
+  let g:bufExplorerRunning = 0
+endif
+
 " Characters that must be escaped for a regular expression.
 let s:escregexp = "/*^$.~\[]"
 let s:hideNames = "\\[[^\\]]*\\]"
 
-" -------- Stuff used for winmanager integration --------------
+" -------- Stuff used for winmanager integration -------------- {{{
 let g:BufExplorer_title = "[Buf List]"
 
 if !exists('g:bufExplorerResize')
@@ -173,7 +178,7 @@ function! BufExplorer_ReSize()
   exe presRow
   exe 'normal! '.presCol.'|'
 endfunction
-" --- End winmanager integration specific stuff ------------
+" --- End winmanager integration specific stuff ------------ }}}
 
 " Initialize
 function! <SID>Initialize()
@@ -183,19 +188,32 @@ function! <SID>Initialize()
   let s:_showcmd = &showcmd
   set noshowcmd
 
+  let s:_cpo = &cpo
+  set cpo&vim
+
   let s:_report = &report
   let &report = 10000
+
+  let g:bufExplorerRunning = 1
 endfunction
 
 " Cleanup
 function! <SID>Cleanup()
   let &insertmode = s:_insertmode
   let &showcmd = s:_showcmd
+  let &cpo = s:_cpo
   let &report = s:_report
+
+  let g:bufExplorerRunning = 0
 endfunction
 
 " StartBufExplorer
 function! <SID>StartBufExplorer(split)
+  " Make sure there is only one explorer open at a time.
+  if g:bufExplorerRunning == 1
+    return
+  endif
+
   if <SID>DoAnyMoreBuffersExist() == 0
     echomsg 'There are no more buffers to be explored'
     return
@@ -263,6 +281,7 @@ function! <SID>DisplayBuffers()
   nnoremap <buffer> <silent> m :call <SID>MRUListShow()<cr>
   nnoremap <buffer> <silent> p :call <SID>ToggleSplitOutPathName()<cr>
   nnoremap <buffer> <silent> q :call <SID>BackToPreviousBuffer()<cr>
+  nnoremap <buffer> <silent> <esc> :call <SID>BackToPreviousBuffer()<cr>
   nnoremap <buffer> <silent> r :call <SID>SortReverse()<cr>
   nnoremap <buffer> <silent> s :call <SID>SortSelect()<cr>
 
@@ -343,7 +362,7 @@ function! <SID>AddHeader()
     endif
 
     let header = header."\" p : toggle spliting of file and path name\n"
-    let header = header."\" q : quit the Buffer Explorer\n"
+    let header = header."\" q or <esc> : quit the Buffer Explorer\n"
     let header = header."\" s : select sort field\n"
 
     if s:bufExplorerSplitWindow == 1
@@ -547,7 +566,7 @@ function! <SID>BackToPreviousBuffer()
 
   if s:altBufNbr > 0
     exec("b! ".s:altBufNbr)
-    let switched = 1
+    let _switched = 1
   endif
 
   if s:curBufNbr > 0
@@ -862,4 +881,4 @@ function! <SID>CleanUpHistory()
   let @/ = histget("/", -1)
 endfunction
 
-" vim:sw=2:ts=2:et
+" vim:ft=vim:fdm=marker:
