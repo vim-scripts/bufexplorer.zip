@@ -1,4 +1,4 @@
-*bufexplorer.txt*  Buffer Explorer  Last Change: February 19, 2002
+*bufexplorer.txt*  Buffer Explorer  Last Change: February 20, 2002
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
 
@@ -108,6 +108,7 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.0.15 - Srinath Avadhanulax added a patch for winmanager.vim.
 6.0.14 - Fix a yew more bug that I thought I already had fixed. Thanks
          to Eric Bloodworth for adding 'Open Mode/Edit in Place'. Added
          vertical splitting.

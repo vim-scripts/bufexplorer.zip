@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta@yahoo.com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Tuesday, February 19, 2001
-"      Version: 6.0.14
+"  Last Change: Wednesday, February 20, 2002
+"      Version: 6.0.15
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -122,6 +122,7 @@ endif
 " plugin was called. in a standalone fashion or by winmanager.
 function! BufExplorer_Start()
   let b:displayMode = 'winmanager'
+  let s:bufExplorerSplitWindow = 0
   call s:StartBufExplorer(0)
 endfunction
 
