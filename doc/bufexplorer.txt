@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 23 July 2004
+*bufexplorer.txt*              Buffer Explorer       Last Change: 28 Feb 2005
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 6.3.0
+                                Version 7.0.0
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -90,6 +90,18 @@ To control the type of split when creating a new window, use: >
   let g:bufExplorerSplitType='v'       " Split vertically.
 The default is to split horizontally.
 
+                                                   *g:bufexplorersplitvertsize*
+To control the width of the window when opening a new window vertically
+use: >
+  let g:bufexplorersplitvertsize = [width]
+The default is 0, which is to use half the existing width.
+
+                                                   *g:bufExplorerSplitHorzSize*
+To control the height of the window When opening a new window horizontally
+use: >
+  let g:bufExplorerSplitHorzSize = [height]
+The default is 0, which is to use half the existing height.
+
                                                         *g:bufExplorerOpenMode*
 To control how the selected buffer is opened in 'split mode', use: >
   let g:bufExplorerOpenMode=1       " Open using current window.
@@ -112,6 +124,12 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.0  - Thanks to Shankar R. for suggesting to add the ability to set
+         the fixed width (g:bufExplorerSplitVertSize) of a new window
+         when opening bufexplorer vertically and fixed height
+         (g:bufExplorerSplitHorzSize) of a new window when opening
+         bufexplorer horizontally. By default, the windows are normally
+         split to use half the existing width or height.
 6.3.0  - Added keepjumps so that the jumps list would not get clutered with
          bufexplorer related stuff.
 6.2.3  - Thanks to Jay Logan for finding a bug in the vertical split postion
@@ -196,7 +214,7 @@ Improve performance even more.
 ===============================================================================
 CREDITS                                                   *bufexplorer-credits*
 
-Author: Jeff Lanzarotta <jefflanzarotta at yahoo dot com>
+Author: Jeff Lanzarotta <delux256-vim at yahoo dot com>
 
 Credit must go out to Bram Moolenaar and all the Vim developers for
 making the world's best editor (IMHO). I also want to thank everyone who

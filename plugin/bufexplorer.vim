@@ -1,5 +1,5 @@
 "=============================================================================
-"    Copyright: Copyright (C) 2001-2004 Jeff Lanzarotta
+"    Copyright: Copyright (C) 2001-2005 Jeff Lanzarotta
 "               Permission is hereby granted to use and distribute this code,
 "               with or without modifications, provided that this copyright
 "               notice is copied with it. Like anything else that's free,
@@ -9,10 +9,9 @@
 "               resulting from the use of this software.
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
-"   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
-"          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.zip
-"  Last Change: Friday, 23 July 2004
-"      Version: 6.3.0
+"   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
+" Last Changed: Monday, 28 February 2005
+"      Version: 7.0.0
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -106,6 +105,16 @@ endif
 " one. 1 = use current, 0 = use new.
 if !exists("g:bufExplorerOpenMode")
   let g:bufExplorerOpenMode = 0
+endif
+
+" When opening a new window vertically, set the width to be this value.
+if !exists("g:bufExplorerSplitVertSize")
+  let g:bufExplorerSplitVertSize = 0
+endif
+
+" When opening a new window horizontally, set the height to be this value.
+if !exists("g:bufExplorerSplitHorzSize")
+  let g:bufExplorerSplitHorzSize = 0
 endif
 
 " Whether to sort in forward or reverse order.
@@ -262,6 +271,8 @@ function! <SID>StartBufExplorer(split)
       endif
 
       let s:bufExplorerSplitWindow = 1
+
+      call <SID>Resize()
     else
       if has("win32")
         exe "silent! e [BufExplorer]"
@@ -938,6 +949,19 @@ endfunction
 function! <SID>CleanUpHistory()
   call histdel("/", -1)
   let @/ = histget("/", -1)
+endfunction
+
+" Resize {{{1
+function! <SID>Resize()
+  if g:bufExplorerSplitType == "v"
+    if g:bufExplorerSplitVertSize > 0
+      exe g:bufExplorerSplitVertSize." wincmd |"
+    end
+  else
+    if g:bufExplorerSplitHorzSize > 0
+      exe g:bufExplorerSplitHorzSize." wincmd _"
+    end
+  endif
 endfunction
 
 " vim:ft=vim foldmethod=marker
