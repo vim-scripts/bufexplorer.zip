@@ -11,8 +11,8 @@
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (jefflanzarotta at yahoo dot com)
 "          URL: http://lanzarotta.tripod.com/vim/plugin/6/bufexplorer.vim.zip
-"  Last Change: Tuesday, 11 March 2003
-"      Version: 6.1.3
+"  Last Change: Tuesday, 18 March 2003
+"      Version: 6.1.4
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -49,8 +49,8 @@ augroup bufexplorer
   autocmd!
   autocmd BufEnter * silent call <SID>MRUPush()
   autocmd BufDelete * silent call <SID>MRUPop()
-  autocmd BufEnter [BufExplorer] silent call <SID>Initialize()
-  autocmd BufLeave [BufExplorer] silent call <SID>Cleanup()
+  autocmd BufEnter \[BufExplorer\] silent call <SID>Initialize()
+  autocmd BufLeave \[BufExplorer\] silent call <SID>Cleanup()
 augroup End
 
 " Create commands
@@ -208,6 +208,9 @@ function! <SID>Initialize()
 
   let s:_report = &report
   let &report = 10000
+
+  setlocal nonumber
+  setlocal foldcolumn=0
 
   let s:_splitType = g:bufExplorerSplitType
 
@@ -417,14 +420,13 @@ function! <SID>AddHeader()
 
   let header = header."\"=\n"
 
-  "XXX
   silent! put! =header
 endfunction
 
 " ShowBuffers {{{1
 function! <SID>ShowBuffers()
   " Delete all lines in buffer.
-  silent 1,$d _
+  silent! 1,$d _
 
   call <SID>AddHeader()
 
@@ -655,7 +657,6 @@ function! <SID>UpdateHeader()
 
   " Remove old header
   0
-  " XXX
   silent! 1,/^"=/ d _
 
   call <SID>CleanUpHistory()
