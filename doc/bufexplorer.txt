@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 10 Mar 2005
+*bufexplorer.txt*              Buffer Explorer       Last Change: 25 Mar 2005
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.1
+                                Version 7.0.2
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -124,6 +124,9 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.2  - Thanks to Thomas Arendsen Hein for finding a problem when a user
+         has the default help turned off and then brought up the explorer. An
+         E493 would be displayed.
 7.0.1  - Thanks to Erwin Waterlander for finding a couple problems.
          The first problem allowed a modified buffer to be deleted.  Opps! The
          second problem occured when several files were opened, BufExplorer

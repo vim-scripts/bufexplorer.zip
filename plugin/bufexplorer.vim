@@ -10,8 +10,8 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Thursday, 10 March 2005
-"      Version: 7.0.1
+" Last Changed: Friday, 25 March 2005
+"      Version: 7.0.2
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -485,8 +485,13 @@ function! <SID>ShowBuffers()
     endif
   endif
 
-  " Get the line number of the last line of the header + 1.
-  let _lineNbr = line(".") + 1
+  " Get the line number of the last line of the header + 1 if there is
+  " actually a header.
+  if g:bufExplorerDefaultHelp == 0
+    let _lineNbr = 0
+  else
+    let _lineNbr = line(".") + 1
+  endif
 
   put = filenames
 
