@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 28 Feb 2005
+*bufexplorer.txt*              Buffer Explorer       Last Change: 10 Mar 2005
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.0
+                                Version 7.0.1
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -124,6 +124,12 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.1  - Thanks to Erwin Waterlander for finding a couple problems.
+         The first problem allowed a modified buffer to be deleted.  Opps! The
+         second problem occured when several files were opened, BufExplorer
+         was started, the current buffer was deleted using the 'd' option, and
+         then BufExplorer was exited. The deleted buffer was still visible
+         while it is not in the buffers list. Opps again!
 7.0.0  - Thanks to Shankar R. for suggesting to add the ability to set
          the fixed width (g:bufExplorerSplitVertSize) of a new window
          when opening bufexplorer vertically and fixed height

@@ -10,8 +10,8 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Monday, 28 February 2005
-"      Version: 7.0.0
+" Last Changed: Thursday, 10 March 2005
+"      Version: 7.0.1
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -245,7 +245,7 @@ function! <SID>StartBufExplorer(split)
   endif
 
   if <SID>DoAnyMoreBuffersExist() == 0
-    echomsg "Sorry, there are no more buffers to be explored"
+    echohl WarningMsg | echo "Sorry, there are no more buffers to be explored"
     return
   endif
 
@@ -594,8 +594,12 @@ function! <SID>DeleteBuffer()
     call WinManagerSuspendAUs()
   end
 
-  exe "silent! bd "._bufNbr
-  d _
+  if getbufvar(_bufNbr, '&modified') == 1
+    echohl ErrorMsg | echo "Sorry, no write since last change for buffer "._bufNbr.", unable to delete"
+  else
+    exe "silent! bw "._bufNbr
+    d _
+  endif
 
   " Reactivate winmanager autocommand activity.
   if exists("b:displayMode") && b:displayMode == "winmanager"
@@ -620,8 +624,13 @@ function! <SID>BackToPreviousBuffer()
   endif
 
   if s:curBufNbr > 0
-    exe "silent! b! ".s:curBufNbr
     let _switched = 1
+
+    try
+      exe "silent b! ".s:curBufNbr
+    catch /^Vim(\a\+):E86:/
+      echohl WarningMsg | echo "Current buffer was deleted, please select a buffer to switch to"
+    endtry
   endif
 
   if _switched == 0
