@@ -1,4 +1,4 @@
-*bufexplorer.txt*  Buffer Explorer  Last Change: January 25, 2002
+*bufexplorer.txt*  Buffer Explorer  Last Change: January 31, 2002
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
 
@@ -92,6 +92,8 @@ To control whether to split out the path and file name or not, use: >
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+6.0.12 - Thanks to Madoka Machitani, for the tip on adding the augroup command
+         around the MRUList autocommands.
 6.0.11 - Fixed bug report by Xiangjiang Ma. '"=' was being added to the
          search history which messed up hlsearch.
 6.0.10 - Added the necessary hooks so that the Srinath Avadhanula's
@@ -126,7 +128,7 @@ Improve performance even more.
 ===============================================================================
 CREDITS                                                   *bufexplorer-credits*
 
-Author: Jeff Lanzarotta <jefflanzarotta@yahoo.com>
+Author: Jeff Lanzarotta <jefflanzarotta at yahoo.com>
 
 Credit must go out to Bram Moolenaar and all the Vim developers for
 making the world's best editor (IMHO). I also want to thank everyone who
