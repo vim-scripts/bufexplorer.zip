@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 25 Mar 2005
+*bufexplorer.txt*              Buffer Explorer       Last Change: 30 Sept 2005
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.2
+                                Version 7.0.3
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -104,8 +104,8 @@ The default is 0, which is to use half the existing height.
 
                                                         *g:bufExplorerOpenMode*
 To control how the selected buffer is opened in 'split mode', use: >
-  let g:bufExplorerOpenMode=1       " Open using current window.
-  let g:bufExplorerOpenMode=0       " Open in new window.
+  let g:bufExplorerOpenMode=1          " Open using current window.
+  let g:bufExplorerOpenMode=0          " Open in new window.
 The default is to use a new window.
 
                                                    *g:bufExplorerSortDirection*
@@ -117,13 +117,25 @@ The default is to sort forwards.
                                                 *g:bufExplorerSplitOutPathName*
 To control whether to split out the path and file name or not, use: >
   let g:bufExplorerSplitOutPathName=1  " Split the path and file name.
-  let g:bufExplorerSplitOutPathName=-1 " Don't split the path and file
+  let g:bufExplorerSplitOutPathName=0  " Don't split the path and file
                                        " name.
 The default is to split the path and file name.
+
+                                                 *g:bufExplorerShowDirectories*
+Directories usually show up in the list from using a command like ":e .".
+To control whether to show directories in the buffer list or not, use: >
+  let g:bufExplorerShowDirectories=1   " Show directories.
+  let g:bufExplorerShowDirectories=0   " Don't show directories.
 
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.3  - Thanks to Erwin Waterlander for finding a problem when the last
+         buffer was deleted. This issue got me to rewrite the buffer display
+         logic (which I've wanted to do for sometime now).
+         Also great thanks to Dave Eggum for coming up with idea for
+         g:bufExplorerShowDirectories. Read the above information about this
+         feature.
 7.0.2  - Thanks to Thomas Arendsen Hein for finding a problem when a user
          has the default help turned off and then brought up the explorer. An
          E493 would be displayed.

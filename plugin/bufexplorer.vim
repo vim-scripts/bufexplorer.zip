@@ -10,8 +10,8 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Friday, 25 March 2005
-"      Version: 7.0.2
+" Last Changed: Friday, 30 September 2005
+"      Version: 7.0.3
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -34,11 +34,12 @@
 
 " Exit quickly when BufExplorer has already been loaded or when 'compatible'
 " is set.
-if exists("loaded_bufexplorer") || &cp
+if exists("g:loaded_bufexplorer") || &cp
   finish
 endif
 
-let loaded_bufexplorer = 1
+" Version number.
+let g:loaded_bufexplorer = "7.0.3"
 
 " Setup the global MRUList.
 let g:MRUList = ","
@@ -50,6 +51,7 @@ augroup bufexplorer
   autocmd BufDelete * silent call <SID>MRUPop()
   autocmd BufEnter \[BufExplorer\] silent call <SID>Initialize()
   autocmd BufLeave \[BufExplorer\] silent call <SID>Cleanup()
+  autocmd VimEnter * silent call <SID>BuildInitialMRU()
 augroup End
 
 " Create commands
@@ -130,6 +132,13 @@ endif
 " 0 = Don't split, 1 = Do split.
 if !exists("g:bufExplorerSplitOutPathName")
   let g:bufExplorerSplitOutPathName = 1
+endif
+
+" Whether to show directories in the buffer list or not. Directories
+" usually show up in the list from using a command like ":e .".
+" 0 = Don't show, 1 = Do show.
+if !exists("g:bufExplorerShowDirectories")
+  let g:bufExplorerShowDirectories = 1
 endif
 
 " Used to make sure that only one BufExplorer is open at a time.
@@ -256,7 +265,7 @@ function! <SID>StartBufExplorer(split)
     let g:bufExplorerSplitType = "v"
   endif
 
-  " Save current and alternate buffer numbers for later.
+  " Get the current and alternate buffer numbers for later.
   let s:curBufNbr = <SID>MRUGet(1)
   let s:altBufNbr = <SID>MRUGet(2)
 
@@ -284,13 +293,13 @@ function! <SID>StartBufExplorer(split)
     endif
   endif
 
-  call <SID>DisplayBuffers()
+  call <SID>DisplayBufferList()
 
   let &splitbelow = _splitbelow
 endfunction
 
-" DisplayBuffers {{{1
-function! <SID>DisplayBuffers()
+" DisplayBufferList {{{1
+function! <SID>DisplayBufferList()
   setlocal bufhidden=delete
   setlocal buftype=nofile
   setlocal modifiable
@@ -301,6 +310,18 @@ function! <SID>DisplayBuffers()
     call <SID>SetupSyntax()
   endif
 
+  call <SID>MapKeys()
+  call <SID>BuildBufferList()
+
+  if !g:bufExplorerResize
+    normal! zz
+  endif
+
+  setlocal nomodifiable
+endfunction
+
+" MapKeys {{{1
+function! <SID>MapKeys()
   if exists("b:displayMode") && b:displayMode == "winmanager"
     nnoremap <buffer> <silent> <tab> :call <SID>SelectBuffer(1)<cr>
   endif
@@ -320,14 +341,6 @@ function! <SID>DisplayBuffers()
   nnoremap <buffer> <silent> q :call <SID>BackToPreviousBuffer()<cr>
   nnoremap <buffer> <silent> r :call <SID>SortReverse()<cr>
   nnoremap <buffer> <silent> s :call <SID>SortSelect()<cr>
-
-  call <SID>ShowBuffers()
-
-  if !g:bufExplorerResize
-    normal! zz
-  endif
-
-  setlocal nomodifiable
 endfunction
 
 " SetupSyntax {{{1
@@ -339,17 +352,13 @@ if has("syntax")
     syn match bufExplorerOpenIn   "^\" Open in .*$"
     syn match bufExplorerBufNbr   /^\s*\d\+/
 
-    syn match bufExplorerBufFlg transparent contains=@bufExpFlags /^\s*\d\+.\{6}/
-    syn cluster bufExpFlags contains=bufExplorerBufNbr,bufExpFlagUnlisted,bufExpFlagCurBuf,bufExpFlagAltBuf,bufExpFlagHidBuf,bufExpFlagActBuf,bufExpFlagModBuf,bufExpFlagLockedBuf,bufExpFlagTagged
-    syn match bufExpFlagUnlisted contained /u/
+    syn cluster bufExpFlags contains=bufExplorerBufNbr,bufExpFlagCurBuf,bufExpFlagAltBuf,bufExpFlagActBuf,bufExpFlagModBuf,bufExpFlagLockedBuf,bufExpFlagTagged
     syn match bufExpFlagCurBuf contained /%/
     syn match bufExpFlagAltBuf contained /#/
     syn match bufExpFlagHidBuf contained /h/
     syn match bufExpFlagActBuf contained /a/
     syn match bufExpFlagModBuf contained /+/
     syn match bufExpFlagLockedBuf contained /[\-=]/
-    syn match bufExpFlagTagged contained /\*/
-    syn match bufExplorerUnlisted contains=bufExplorerBufFlg /^\s*\d\+u.*$/
     syn match bufExplorerHidBuf contains=bufExplorerBufFlg /^\s*\d\+[u ][%# ]h.*$/
     syn match bufExplorerActBuf contains=bufExplorerBufFlg /^\s*\d\+[u ][%# ]a.*$/
     syn match bufExplorerCurBuf contains=bufExplorerBufFlg /^\s*\d\+[u ]%.*$/
@@ -359,6 +368,7 @@ if has("syntax")
 
     if !exists("g:did_bufexplorer_syntax_inits")
       let g:did_bufexplorer_syntax_inits = 1
+
       hi def link bufExplorerBufNbr Number
       hi def link bufExplorerHelp Special
       hi def link bufExplorerHelpEnd Special
@@ -393,8 +403,8 @@ function! <SID>AddHeader()
   1
 
   if g:bufExplorerDetailedHelp == 1
-    let header = "\" Buffer Explorer\n"
-    let header = header."\" ----------------\n"
+    let header = "\" Buffer Explorer (".g:loaded_bufexplorer.")\n"
+    let header = header."\" --------------------------\n"
     let header = header."\" <enter> or Mouse-Double-Click : open buffer under cursor\n"
     let header = header."\" d : delete buffer\n"
 
@@ -439,8 +449,8 @@ function! <SID>AddHeader()
   silent! put! =header
 endfunction
 
-" ShowBuffers {{{1
-function! <SID>ShowBuffers()
+" BuildBufferList {{{1
+function! <SID>BuildBufferList()
   " Delete all lines in buffer.
   silent! 1,$d _
 
@@ -451,37 +461,112 @@ function! <SID>ShowBuffers()
   " Prevent odd huge indent when first invoked.
   normal! 0
 
-  let a_save = @a
+  let nBuffers = bufnr('$')     " Get the number of the last buffer.
+  let i = 0
+  let fileNames = ''
+  let maxBufferNameWidth = 0
+  let maxBufferNbrWidth = 0
 
-  redir @a
-    silent ls
-  redir END
+  " Preprocess the list of buffers.
+  " Find the max buffer name and buffer number.
+  while (i <= nBuffers)
+    let i = i + 1
 
-  let filenames = @a
-  let @a = a_save
-  unlet a_save
+    if (getbufvar(i, '&buflisted') == 1)
+      let bufName = bufname(i)
 
-  " Remove the word *line* and double quotes from the lines.
-  let filenames = substitute(filenames, "\\(\\s*\\d\\+[^\"]\\{-}\\)\\%(\"\\)\\([^\"]\\+\\)\\%(\"[^\n]*\\)\\(\n\\|$\\)", "\\1\\2\\3", "g")
+      let length = strlen(i)
 
-  " Hide [.*] Buffer names ([No File], [BufExplorer],...)
-  let redone = 0
-  while match(filenames, "\\%(^\\|\n\\)\\%(\\s*\\d\\+.\\{6}" . s:hideNames . "\\%(\n\\|$\\)\\|\n\n\\|\n$\\|^\n\\)") != -1 && redone < 100
-    let filenames = substitute(filenames, "\\%(\\%(\n\\|^\\)[^\n]*" . s:hideNames . "\\)\\(\n\\|$\\)", "\n", "g")
-    let filenames = substitute(filenames, "\\%(\n\n\\+\\|^\n\\+\\|\n\\+$\\)", "", "g")
-    let redone = redone + 1
+      if (maxBufferNbrWidth < length)
+        let maxBufferNbrWidth = length
+      endif
+
+      let shortBufName = fnamemodify(bufName, ":t")
+      let length = strlen(shortBufName)
+
+      if (maxBufferNameWidth < length)
+        let maxBufferNameWidth = length
+      endif
+    endif
   endwhile
 
-  if filenames != ""
+  " Loop through every buffer less than the total number of buffers.
+  let i = 0
+  while (i <= nBuffers)
+    let i = i + 1
+
+    " Make sure the buffer in question is listed.
+    if (getbufvar(i, '&buflisted') == 1)
+      " Get the name of the buffer.
+      let bufName = bufname(i)
+
+      " Only show modifiable buffers (The idea is that we don't 
+      " want to show Explorers)
+      if (bufName != '[BufExplorer]')
+        " Get filename & Remove []'s & ()'s
+        let shortBufName = fnamemodify(bufName, ":t")
+        let pathName = fnamemodify(bufName, ":p:h")
+        let _ftype = getftype(bufName)
+
+        if _ftype == "dir" && g:bufExplorerShowDirectories == 1
+          let shortBufName = "<DIRECTORY>"
+        end
+
+        " If the buffer is modified then mark it
+        if (getbufvar(i, '&modified') == 1)
+          let modified = "+"
+        else
+          let modified = " "
+        endif
+
+        " Create the pad for the buffer number.
+        let diffWidth = maxBufferNbrWidth - strlen(i)
+        let nbrPad = "  "
+
+        while (diffWidth)
+          let nbrPad = nbrPad." "
+          let diffWidth = diffWidth - 1
+        endwhile
+
+        " Format the final line and add it to the buffer.
+        if g:bufExplorerSplitOutPathName
+          " Create the pad for the buffer name if needed.
+          let diffWidth = maxBufferNameWidth - strlen(shortBufName)
+          let namePad = " "
+
+          while (diffWidth)
+            let namePad = namePad." "
+            let diffWidth = diffWidth - 1
+          endwhile
+
+          let fileNames = fileNames.nbrPad.i." ".modified."    ".shortBufName.namePad.pathName."\n"
+        else
+          let separator = ""
+
+          if pathName !~ '[/\\]$'
+            if has("win32") || has("win95") || has("win64") || has("win16")
+              let separator = "\\"
+            else
+              let separator = "/"
+            end
+          end
+
+          let fileNames = fileNames.nbrPad.i." ".modified."    ".pathName.separator.shortBufName."\n"
+        end
+      endif
+    endif
+  endwhile
+
+  if fileNames != ""
     " Mark the current and alternate buffers.
-    if match(filenames, "\\%(^\\|\n\\)\\s*" . s:curBufNbr . "[u ]") != -1
-      let filenames = substitute(filenames, "\\(\\%(^\\|\n\\)\\s*\\d\\+\\%( \\|u\\)\\)%", "\\1 ", "")
-      let filenames = substitute(filenames, "\\(\\%(^\\|\n\\)\\s*" . s:curBufNbr . "\\%( \\|u\\)\\).", "\\1%", "")
+    if match(fileNames, "\\%(^\\|\n\\)\\s*" . s:curBufNbr . "[u ]") != -1
+      let fileNames = substitute(fileNames, "\\(\\%(^\\|\n\\)\\s*\\d\\+\\%( \\|u\\)\\)%", "\\1 ", "")
+      let fileNames = substitute(fileNames, "\\(\\%(^\\|\n\\)\\s*" . s:curBufNbr . "\\%( \\|u\\)\\).", "\\1%", "")
     endif
 
-    if match(filenames, "\\%(^\\|\n\\)\\s*" . s:altBufNbr . "[u ]") != -1
-      let filenames = substitute(filenames, "\\(\\%(^\\|\n\\)\\s*\\d\\+\\%( \\|u\\)\\)#", "\\1 ", "")
-      let filenames = substitute(filenames, "\\(\\%(^\\|\n\\)\\s*" . s:altBufNbr . "\\%( \\|u\\)\\).", "\\1#", "")
+    if match(fileNames, "\\%(^\\|\n\\)\\s*" . s:altBufNbr . "[u ]") != -1
+      let fileNames = substitute(fileNames, "\\(\\%(^\\|\n\\)\\s*\\d\\+\\%( \\|u\\)\\)#", "\\1 ", "")
+      let fileNames = substitute(fileNames, "\\(\\%(^\\|\n\\)\\s*" . s:altBufNbr . "\\%( \\|u\\)\\).", "\\1#", "")
     endif
   endif
 
@@ -493,60 +578,9 @@ function! <SID>ShowBuffers()
     let _lineNbr = line(".") + 1
   endif
 
-  put = filenames
-
-  " Remove any blank lines.
-  silent! g/^\s*$/d
-
-  call <SID>CleanUpHistory()
-
-  if g:bufExplorerSplitOutPathName
-    exe _lineNbr.",$call <SID>SplitOutPathName()"
-  endif
+  put = fileNames
 
   call <SID>SortListing()
-endfunction
-
-" SplitOutPathName {{{1
-function! <SID>SplitOutPathName() range
-  if a:lastline >= a:firstline
-    let maxlen = 0
-    let scanline = a:firstline
-    let leaderlen = strlen(matchstr(getline("."), "^\\s*\\d\\+.\\{6}"))
-
-    while scanline <= a:lastline
-      let _cnr = <SID>ExtractBufferNbr(getline(scanline))
-      let linelen = strlen(expand("#"._cnr.":p:t"))
-
-      if linelen + leaderlen > maxlen
-        let maxlen = linelen + leaderlen
-      endif
-
-      let scanline = scanline + 1
-    endwhile
-
-    let scanline = a:firstline
-
-    while scanline <= a:lastline
-      let _cfile = getline(scanline)
-      let _cnr = <SID>ExtractBufferNbr(_cfile)
-      let _cfile = matchstr(_cfile, "^\\s*\\d\\+.\\{6}").expand("#"._cnr.":p:t")
-      let pad = maxlen - strlen(_cfile)
-      let padloop = 0
-
-      while padloop < pad
-        let _cfile = _cfile . " "
-        let padloop = padloop + 1
-      endwhile
-
-      let _cfile = _cfile." ".expand("#"._cnr.":p:h")
-      "let _cfile = _cfile." ".substitute( expand("#"._cnr.":p:h"), $HOME, "~", "g" )
-
-      call setline(scanline, _cfile)
-
-      let scanline = scanline + 1
-    endwhile
-  endif
 endfunction
 
 " SelectBuffer {{{1
@@ -571,8 +605,14 @@ function! <SID>SelectBuffer(...)
 
     " Switch to the previously open buffer. This sets the alternate file
     " to the correct one, so that when we switch to the new buffer, the
-    " alternate buffer is correct.
-    exe "silent! b! " . s:curBufNbr
+    " alternate buffer is correct. But if switching to current buffer again,
+    " restore the alternate one.
+    if s:curBufNbr == _bufNbr
+      exe "silent! b! " . s:altBufNbr
+    else
+      exe "silent! b! " . s:curBufNbr
+    endif
+
     exe "b! " . _bufNbr
 
     call <SID>MRUPush()
@@ -580,7 +620,7 @@ function! <SID>SelectBuffer(...)
     setlocal modifiable
     d _
     setlocal nomodifiable
-    echoerr "That buffer no longer exists, please select another"
+    echoerr "Sorry, that buffer no longer exists, please select another"
   endif
 endfunction
 
@@ -590,9 +630,16 @@ function! <SID>DeleteBuffer()
     return
   endif
 
-  setlocal modifiable
-
   let _bufNbr = <SID>ExtractBufferNbr(getline('.'))
+
+  " If there are 2 or less ',' in the MRUList, then this is the last buffer,
+  " do not allow this buffer to be deleted.
+  if strlen(substitute(g:MRUList, "[^,]", "","g")) <= 2
+    echohl ErrorMsg | echo "Sorry, you are not allowed to delete the last buffer"
+    return
+  endif
+
+  setlocal modifiable
 
   " These commands are to temporarily suspend the activity of winmanager.
   if exists("b:displayMode") && b:displayMode == "winmanager"
@@ -664,7 +711,7 @@ function! <SID>ToggleSplitOutPathName()
   setlocal modifiable
 
   call <SID>SaveCursorPosition()
-  call <SID>ShowBuffers()
+  call <SID>BuildBufferList()
   call <SID>RestoreCursorPosition()
 
   setlocal nomodifiable
@@ -752,9 +799,9 @@ function! <SID>MRUCmp(line1, line2, direction)
   let i1 = stridx(g:MRUList, ','.n1.',')
   let i2 = stridx(g:MRUList, ','.n2.',')
 
-  " Compare the indices only if they are both in the MRU. Ootherwise, if one
-  " of the buffer numbers is not in the mru list, define define the other as
-  " the 'smaller'. If both buffers are not in the mru list, then compare their
+  " Compare the indices only if they are both in the MRU. Otherwise, if
+  " one of the buffer numbers is not in the mru list, define the other as the
+  " 'smaller'. If both buffers are not in the mru list, then compare their
   " buffer numbers.
   let val = a:direction*(i1 - i2)*(i1 != -1 && i2 != -1)
         \ - a:direction*( (i1 != -1 && i2 == -1) - (i1 == -1 && i2 != -1) )
@@ -905,9 +952,25 @@ function! <SID>RestoreCursorPosition()
   exe "normal! ".s:curColumn."|"
 endfunction
 
+" MRUPushReversed {{{1
+function! <SID>MRUPushReversed(bufNbr)
+  " Don't add the BufExplorer window to the list.
+  if bufname(a:bufNbr) == "[BufExplorer]"
+    return
+  end
+
+  let _list = substitute(g:MRUList, ','.a:bufNbr.',', ',', '')
+  let g:MRUList = _list.a:bufNbr.","
+endfunction
+
 " MRUPush {{{1
 function! <SID>MRUPush()
   if !buflisted(bufnr("%"))
+    return
+  end
+
+  " Don't add the BufExplorer window to the list.
+  if bufname("%") == "[BufExplorer]"
     return
   end
 
@@ -931,6 +994,20 @@ function! <SID>MRUGet(slot)
   end
 
   return _bufNbr
+endfunction
+
+function! <SID>BuildInitialMRU()
+  let nBuffers = bufnr('$')
+  let i = 0
+
+  " Preprocess the list of buffers.
+  while (i <= nBuffers)
+    let i = i + 1
+
+    if (getbufvar(i, '&buflisted') == 1)
+      call <SID>MRUPushReversed(i)
+    end
+  endwhile
 endfunction
 
 " MRUListShow {{{1
