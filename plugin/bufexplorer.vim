@@ -10,8 +10,8 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Friday, 30 September 2005
-"      Version: 7.0.3
+" Last Changed: Monday, 3 October 2005
+"      Version: 7.0.4
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -506,10 +506,13 @@ function! <SID>BuildBufferList()
         " Get filename & Remove []'s & ()'s
         let shortBufName = fnamemodify(bufName, ":t")
         let pathName = fnamemodify(bufName, ":p:h")
-        let _ftype = getftype(bufName)
 
-        if _ftype == "dir" && g:bufExplorerShowDirectories == 1
-          let shortBufName = "<DIRECTORY>"
+        if v:version >= 700
+          let _ftype = getftype(bufName)
+
+          if _ftype == "dir" && g:bufExplorerShowDirectories == 1
+            let shortBufName = "<DIRECTORY>"
+          end
         end
 
         " If the buffer is modified then mark it

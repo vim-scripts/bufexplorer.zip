@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 30 Sept 2005
+*bufexplorer.txt*              Buffer Explorer       Last Change: 03 Oct 2005
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.3
+                                Version 7.0.4
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -126,10 +126,16 @@ Directories usually show up in the list from using a command like ":e .".
 To control whether to show directories in the buffer list or not, use: >
   let g:bufExplorerShowDirectories=1   " Show directories.
   let g:bufExplorerShowDirectories=0   " Don't show directories.
+Note: This is only available when using vim 7.0 and above.
 
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.4  - Fixed a problem discovered first by Xiangjiang Ma. Well since I've
+         been using vim 7.0 and not 6.3, I started using a function (getftype)
+         that is not in 6.3. So for backward compatibility, I conditionaly use
+         this function now.  Thus, the g:bufExplorerShowDirectories feature is
+         only available when using vim 7.0 and above.
 7.0.3  - Thanks to Erwin Waterlander for finding a problem when the last
          buffer was deleted. This issue got me to rewrite the buffer display
          logic (which I've wanted to do for sometime now).
