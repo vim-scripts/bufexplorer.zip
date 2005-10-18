@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 03 Oct 2005
+*bufexplorer.txt*              Buffer Explorer       Last Change: 18 Oct 2005
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.4
+                                Version 7.0.5
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -131,6 +131,8 @@ Note: This is only available when using vim 7.0 and above.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.5  - Thanks to Mun Johl for pointing out a bug that if a buffer was
+         modified, the '+' was not showing up correctly.
 7.0.4  - Fixed a problem discovered first by Xiangjiang Ma. Well since I've
          been using vim 7.0 and not 6.3, I started using a function (getftype)
          that is not in 6.3. So for backward compatibility, I conditionaly use

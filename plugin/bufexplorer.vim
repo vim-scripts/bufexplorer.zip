@@ -10,8 +10,8 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Monday, 3 October 2005
-"      Version: 7.0.4
+" Last Changed: Tuesday, 18 October 2005
+"      Version: See g:loaded_bufexplorer for version number.
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -39,7 +39,7 @@ if exists("g:loaded_bufexplorer") || &cp
 endif
 
 " Version number.
-let g:loaded_bufexplorer = "7.0.3"
+let g:loaded_bufexplorer = "7.0.5"
 
 " Setup the global MRUList.
 let g:MRUList = ","
@@ -475,17 +475,19 @@ function! <SID>BuildBufferList()
     if (getbufvar(i, '&buflisted') == 1)
       let bufName = bufname(i)
 
-      let length = strlen(i)
+      if (bufName != '[BufExplorer]')
+        let length = strlen(i)
 
-      if (maxBufferNbrWidth < length)
-        let maxBufferNbrWidth = length
-      endif
+        if (maxBufferNbrWidth < length)
+          let maxBufferNbrWidth = length
+        endif
 
-      let shortBufName = fnamemodify(bufName, ":t")
-      let length = strlen(shortBufName)
+        let shortBufName = fnamemodify(bufName, ":t")
+        let length = strlen(shortBufName)
 
-      if (maxBufferNameWidth < length)
-        let maxBufferNameWidth = length
+        if (maxBufferNameWidth < length)
+          let maxBufferNameWidth = length
+        endif
       endif
     endif
   endwhile
@@ -515,7 +517,7 @@ function! <SID>BuildBufferList()
           end
         end
 
-        " If the buffer is modified then mark it
+        " If the buffer is modified then mark it.
         if (getbufvar(i, '&modified') == 1)
           let modified = "+"
         else
@@ -542,7 +544,7 @@ function! <SID>BuildBufferList()
             let diffWidth = diffWidth - 1
           endwhile
 
-          let fileNames = fileNames.nbrPad.i." ".modified."    ".shortBufName.namePad.pathName."\n"
+          let fileNames = fileNames.nbrPad.i."    ".modified." ".shortBufName.namePad.pathName."\n"
         else
           let separator = ""
 
@@ -554,7 +556,7 @@ function! <SID>BuildBufferList()
             end
           end
 
-          let fileNames = fileNames.nbrPad.i." ".modified."    ".pathName.separator.shortBufName."\n"
+          let fileNames = fileNames.nbrPad.i."    ".modified." ".pathName.separator.shortBufName."\n"
         end
       endif
     endif
