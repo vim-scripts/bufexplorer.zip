@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Friday, 18 November 2005
+" Last Changed: Monday, 19 December 2005
 "      Version: See g:loaded_bufexplorer for version number.
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
@@ -39,7 +39,7 @@ if exists("g:loaded_bufexplorer") || &cp
 endif
 
 " Version number.
-let g:loaded_bufexplorer = "7.0.6"
+let g:loaded_bufexplorer = "7.0.7"
 
 " Setup the global MRUList.
 let g:MRUList = ","
@@ -328,6 +328,7 @@ function! <SID>MapKeys()
   nnoremap <buffer> <silent> ? :call <SID>ToggleHelp()<cr>
   nnoremap <buffer> <silent> <2-leftmouse> :call <SID>SelectBuffer(0)<cr>
   nnoremap <buffer> <silent> <cr> :call <SID>SelectBuffer(0)<cr>
+  nnoremap <buffer> <silent> S :call <SID>SelectBuffer(1)<cr>
   nnoremap <buffer> <silent> d :call <SID>DeleteBuffer()<cr>
 
   if s:bufExplorerSplitWindow == 1
@@ -405,6 +406,7 @@ function! <SID>AddHeader()
     let header = "\" Buffer Explorer (".g:loaded_bufexplorer.")\n"
     let header = header."\" --------------------------\n"
     let header = header."\" <enter> or Mouse-Double-Click : open buffer under cursor\n"
+    let header = header."\" S : open buffer under cursor in new split window\n"
     let header = header."\" d : delete buffer\n"
 
     if s:bufExplorerSplitWindow == 1
@@ -617,7 +619,13 @@ function! <SID>SelectBuffer(...)
       exe "silent! b! " . s:curBufNbr
     endif
 
-    exe "b! " . _bufNbr
+    " If we are doing a 'normal' SelectBuffer, 0 was passed in. If '1'
+    " is passed in, the user has choosen to do a 'Split Select'.
+    if a:1 != 1
+      exe "b! " . _bufNbr
+    else
+      exe "silent! ".g:bufExplorerSplitType."sb "._bufNbr
+    endif
 
     call <SID>MRUPush()
   else

@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 18 Nov 2005
+*bufexplorer.txt*              Buffer Explorer       Last Change: 19 Dec 2005
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.6
+                                Version 7.0.7
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -33,6 +33,8 @@ Command to use once exploring:
 
  <cr> or       Opens the buffer that is under the cursor into the current
  <leftmouse>   window.
+ S             Opens the buffer that is under the cursor into a newly split
+               window.
  d             Deletes the buffer from the list that is under the cursor.
  o             Toggles open mode. Only available in 'split mode'.
  p             Toggles the showing of a split filename/pathname.
@@ -131,6 +133,10 @@ Note: This is only available when using vim 7.0 and above.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.7  - Thanks to Jeremy Cowgar for adding a new enhancement. This
+         enhancement allows the user to press 'S', that is capital S, which
+         will open the buffer under the cursor in a newly created split
+         window.
 7.0.6  - Thanks to Larry Zhang for finding a bug in the "split" buffer code.
          If you force set g:bufExplorerSplitType='v' in your vimrc, and if you
          tried to do a \bs to split the bufexplorer window, it would always
