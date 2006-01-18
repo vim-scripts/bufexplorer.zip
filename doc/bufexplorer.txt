@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 19 Dec 2005
+*bufexplorer.txt*              Buffer Explorer       Last Change: 18 Jan 2006
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.7
+                                Version 7.0.8
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -133,6 +133,9 @@ Note: This is only available when using vim 7.0 and above.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.8  - Thanks to Mike Li for catching a bug in the WinManager integration.
+         The bug was related to the incorrect displaying of the buffer
+         explorer's window title.
 7.0.7  - Thanks to Jeremy Cowgar for adding a new enhancement. This
          enhancement allows the user to press 'S', that is capital S, which
          will open the buffer under the cursor in a newly created split
@@ -259,7 +262,7 @@ Author: Jeff Lanzarotta <delux256-vim at yahoo dot com>
 
 Credit must go out to Bram Moolenaar and all the Vim developers for
 making the world's best editor (IMHO). I also want to thank everyone who
-help and gave me suggestions. I wouldn't want to leave anyone out so I
+helped and gave me suggestions. I wouldn't want to leave anyone out so I
 won't list names.
 
 ===============================================================================

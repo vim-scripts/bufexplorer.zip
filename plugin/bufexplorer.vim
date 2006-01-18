@@ -1,5 +1,5 @@
 "=============================================================================
-"    Copyright: Copyright (C) 2001-2005 Jeff Lanzarotta
+"    Copyright: Copyright (C) 2001-2006 Jeff Lanzarotta
 "               Permission is hereby granted to use and distribute this code,
 "               with or without modifications, provided that this copyright
 "               notice is copied with it. Like anything else that's free,
@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Monday, 19 December 2005
+" Last Changed: Wednesday, 18 January 2006
 "      Version: See g:loaded_bufexplorer for version number.
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
@@ -39,7 +39,7 @@ if exists("g:loaded_bufexplorer") || &cp
 endif
 
 " Version number.
-let g:loaded_bufexplorer = "7.0.7"
+let g:loaded_bufexplorer = "7.0.8"
 
 " Setup the global MRUList.
 let g:MRUList = ","
@@ -151,7 +151,7 @@ let s:escregexp = "/*^$.~\[]"
 let s:hideNames = "\\[[^\\]]*\\]"
 
 " Winmanager Integration {{{
-let g:BufExplorer_title = "[Buf List]"
+let g:BufExplorer_title = "\[Buf\ List\]"
 
 if !exists("g:bufExplorerResize")
   let g:bufExplorerResize = 1
