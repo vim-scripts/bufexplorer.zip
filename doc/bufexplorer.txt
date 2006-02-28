@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 18 Jan 2006
+*bufexplorer.txt*              Buffer Explorer       Last Change: 28 Feb 2006
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.8
+                                Version 7.0.9
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -40,7 +40,7 @@ Command to use once exploring:
  p             Toggles the showing of a split filename/pathname.
  q             Quit exploring.
  s             Selects the order the buffers are listed in. Either by their
-               name, by their number or by most recently used.
+               name, by their number or by most recently used (MRU).
  t             Toggles split type. Only available in 'split mode'.
  r             Reverses the order the buffers are listed in.
  ?             Displays help information.
@@ -133,6 +133,10 @@ Note: This is only available when using vim 7.0 and above.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.9  - Martin Grenfell found and eliminated an annoying bug in the
+         bufexplorer/winmanager integration. The bug was were an
+         annoying message would be displayed when a window was split or
+         a new file was opened in a new window. Thanks Martin!
 7.0.8  - Thanks to Mike Li for catching a bug in the WinManager integration.
          The bug was related to the incorrect displaying of the buffer
          explorer's window title.
@@ -266,4 +270,4 @@ helped and gave me suggestions. I wouldn't want to leave anyone out so I
 won't list names.
 
 ===============================================================================
-vim:tw=78:noet:ts=8:ft=help:norl:
+vim:tw=78:noet:wrap:ts=8:ft=help:norl:
