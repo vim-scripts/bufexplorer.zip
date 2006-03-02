@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Monday, 27 February 2006
+" Last Changed: Monday, 02 March 2006
 "      Version: See g:loaded_bufexplorer for version number.
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
@@ -39,7 +39,7 @@ if exists("g:loaded_bufexplorer") || &cp
 endif
 
 " Version number.
-let g:loaded_bufexplorer = "7.0.9"
+let g:loaded_bufexplorer = "7.0.10"
 
 " Setup the global MRUList.
 let g:MRUList = ","
@@ -550,7 +550,8 @@ function! <SID>BuildBufferList()
           let separator = ""
 
           if pathName !~ '[/\\]$'
-            if has("win32") || has("win95") || has("win64") || has("win16")
+            " Check if we are using shellslash or not?
+            if (&ssl == 0) && (has("msdos") || has("os2") || has("win16") || has("win32"))
               let separator = "\\"
             else
               let separator = "/"
