@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 02 Mar 2006
+*bufexplorer.txt*              Buffer Explorer       Last Change: 10 Mar 2006
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.10
+                                Version 7.0.11
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -133,6 +133,8 @@ Note: This is only available when using vim 7.0 and above.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.11 - Fixed a couple of highlighting bugs, reported by David Eggum. He also
+         changed passive voice to active on a couple of warning messages.
 7.0.10 - Fixed bug report by Xiangjiang Ma. If the 'ssl' option is set,
          the slash character used when displaying the path was incorrect.
 7.0.9  - Martin Grenfell found and eliminated an annoying bug in the
@@ -259,7 +261,7 @@ CHANGE LOG                                              *bufexplorer-changelog*
 ===============================================================================
 TODO                                                         *bufexplorer-todo*
 
-Improve performance even more.
+Sort by extension.
 
 ===============================================================================
 CREDITS                                                   *bufexplorer-credits*

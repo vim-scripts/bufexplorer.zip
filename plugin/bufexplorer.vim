@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Monday, 02 March 2006
+" Last Changed: Monday, 10 March 2006
 "      Version: See g:loaded_bufexplorer for version number.
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
@@ -39,7 +39,7 @@ if exists("g:loaded_bufexplorer") || &cp
 endif
 
 " Version number.
-let g:loaded_bufexplorer = "7.0.10"
+let g:loaded_bufexplorer = "7.0.11"
 
 " Setup the global MRUList.
 let g:MRUList = ","
@@ -254,7 +254,8 @@ function! <SID>StartBufExplorer(split)
   endif
 
   if <SID>DoAnyMoreBuffersExist() == 0
-    echohl WarningMsg | echo "Sorry, there are no more buffers to be explored"
+    echohl WarningMsg | echo "Sorry, there are no more buffers to explore"
+    echohl none
     return
   endif
 
@@ -695,6 +696,7 @@ function! <SID>BackToPreviousBuffer()
       exe "silent b! ".s:curBufNbr
     catch /^Vim(\a\+):E86:/
       echohl WarningMsg | echo "Current buffer was deleted, please select a buffer to switch to"
+      echohl none
     endtry
   endif
 
