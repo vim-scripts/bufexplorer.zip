@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 23 Feb 2007
+*bufexplorer.txt*              Buffer Explorer       Last Change: 23 Mar 2007
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.13
+                                Version 7.0.14
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -158,6 +158,10 @@ The default is to use a new window.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.14 - Thanks to Randall Hansen for removing the requirement of terminal
+         versions to be recompiled with 'gui' support so the 'drop' command
+         would work. The 'drop' command is really not needed in terminal
+         versions.
 7.0.13 - Fixed integration with WinManager.
          Thanks to Dave Eggum for another update.
            - Fix: The detailed help didn't display the mapping for toggling
@@ -342,8 +346,6 @@ TODO                                                         *bufexplorer-todo*
 
 - Erwin Waterlander suggestion of being able to open the explorer with one
   buffer.
-- Once the ability to save and restore a jumplist is added to Vim, we need
-  prevent the jumplist from updating when the user searches in bufexplorer.
 
 ===============================================================================
 CREDITS                                                   *bufexplorer-credits*
