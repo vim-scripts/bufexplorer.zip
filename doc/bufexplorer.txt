@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 23 Mar 2007
+*bufexplorer.txt*              Buffer Explorer       Last Change: 27 Apr 2007
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.14
+                                Version 7.0.15
 
 Plugin for easily exploring (or browsing) open buffers
 
@@ -158,6 +158,23 @@ The default is to use a new window.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.0.15 - Thanks to Mark Smithfield for suggesting bufexplorer needed to handle
+         the ':args' command.
+         Fixed issue reported by Liu Jiaping on non Windows systems, which was
+         ...
+         Open file1, open file2, modify file1, open bufexplorer, you get the
+         following error:
+
+         --------8<--------
+         Error detected while processing function
+         <SNR>14_StartBufExplorer..<SNR>14_SplitOpen:
+         line    4:
+         E37: No write since last change (add ! to override)
+
+         But the worse thing is, when I want to save the current buffer and
+         type ':w', I get another error message:
+         E382: Cannot write, 'buftype' option is set 
+         --------8<--------
 7.0.14 - Thanks to Randall Hansen for removing the requirement of terminal
          versions to be recompiled with 'gui' support so the 'drop' command
          would work. The 'drop' command is really not needed in terminal

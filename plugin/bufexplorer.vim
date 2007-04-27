@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Friday, 23 March 2007
+" Last Changed: Friday, 27 April 2007
 "      Version: See g:loaded_bufexplorer for version number.
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
@@ -39,7 +39,7 @@ if exists("g:loaded_bufexplorer") || &cp
 endif
 
 " Version number.
-let g:loaded_bufexplorer = "7.0.14"
+let g:loaded_bufexplorer = "7.0.15"
 
 " Check to make sure the Vim version 700 or greater.
 if v:version < 700
@@ -82,21 +82,17 @@ let s:sort_by = ["number", "name", "fullpath", "mru", "extension"]
 " Setup the autocommands that handle the MRUList and other stuff. {{{1
 augroup bufexplorer
   autocmd!
+  autocmd BufNew * call <SID>MRUPush()
   autocmd BufEnter * call <SID>MRUPush()
   autocmd BufEnter * call <SID>SetAltBufName()
   autocmd BufDelete * call <SID>MRUPop()
   autocmd BufWinEnter \[BufExplorer\] call <SID>Initialize()
   autocmd BufWinLeave \[BufExplorer\] call <SID>Cleanup()
-  autocmd VimEnter * call <SID>BuildInitialMRU()
+  autocmd VimEnter * call <SID>BuildMRU()
 augroup End
 
 " Create commands {{{1
-if has("gui")
-  command BufExplorer :call <SID>StartBufExplorer("drop")
-else
-  command BufExplorer :call <SID>StartBufExplorer("edit")
-end
-
+command BufExplorer :call <SID>StartBufExplorer("drop")
 command SBufExplorer  :call <SID>StartBufExplorer("sp")
 command VSBufExplorer :call <SID>StartBufExplorer("vsp")
 
@@ -247,6 +243,7 @@ function s:StartBufExplorer(open)
     if s:splitWindow
       " Resize
       let [s, c] = (a:open =~ "v") ? [g:bufExplorerSplitVertSize, "|"] : [g:bufExplorerSplitHorzSize, "_"]
+
       if (s > 0)
         exe s "wincmd" c
       endif
@@ -467,8 +464,8 @@ endfunction
 " BuildBufferList {{{1
 function s:BuildBufferList()
   let lines = []
-
   let pads = {}
+
   for n in s:types
     let pads[n] = repeat(' ', s:maxWidths[n])
   endfor
@@ -486,9 +483,11 @@ function s:BuildBufferList()
       let path = buf[type]
       let line .= path
     endif
+
     if !empty(pads[type])
       let line .= strpart(pads[type], len(path))." "
     endif
+
     let line .= buf["line"]
 
     call add(lines, line)
@@ -573,12 +572,12 @@ endfunction
 
 " SplitOpen {{{1
 function s:SplitOpen(cmd)
-    let [_splitbelow, _splitright] = [&splitbelow, &splitright]
-    let [&splitbelow, &splitright] = [g:bufExplorerSplitBelow, g:bufExplorerSplitRight]
+  let [_splitbelow, _splitright] = [&splitbelow, &splitright]
+  let [&splitbelow, &splitright] = [g:bufExplorerSplitBelow, g:bufExplorerSplitRight]
 
-    exe a:cmd
+  exe a:cmd
 
-    let [&splitbelow, &splitright] = [_splitbelow, _splitright]
+  let [&splitbelow, &splitright] = [_splitbelow, _splitright]
 endfunction
 
 " DeleteBuffer {{{1
@@ -800,7 +799,7 @@ endfunction
 
 " MRUPush {{{1
 function s:MRUPush()
-  let bufNbr = bufnr("%")
+  let bufNbr = str2nr(expand('<abuf>'))
 
   " Skip temporary buffer with buftype set.
   " Don't add the BufExplorer window to the list.
@@ -811,7 +810,7 @@ function s:MRUPush()
   end
 
   call s:MRUPop(bufNbr)
-  call insert(s:MRUList,bufNbr)
+  call insert(s:MRUList, bufNbr)
 endfunction
 
 " MRUPop {{{1
@@ -823,8 +822,8 @@ function s:MRUPop(...)
   endif
 endfunction
 
-" BuildInitialMRU {{{1
-function s:BuildInitialMRU()
+" BuildMRU {{{1
+function s:BuildMRU()
   let s:MRUList = range(1, bufnr('$'))
   call filter(s:MRUList, 'buflisted(v:val)')
 endfunction
