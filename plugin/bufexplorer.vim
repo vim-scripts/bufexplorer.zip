@@ -10,8 +10,8 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Friday, 27 April 2007
-"      Version: See g:loaded_bufexplorer for version number.
+" Last Changed: Monday, 23 July 2007
+"      Version: See g:bufexplorer_version for version number.
 "        Usage: Normally, this file should reside in the plugins
 "               directory and be automatically sourced. If not, you must
 "               manually source this file using ':source bufexplorer.vim'.
@@ -34,16 +34,16 @@
 
 " Exit quickly when BufExplorer has already been loaded or when 'compatible'
 " is set.
-if exists("g:loaded_bufexplorer") || &cp
+if exists("g:bufexplorer_version") || &cp
   finish
 endif
 
 " Version number.
-let g:loaded_bufexplorer = "7.0.15"
+let g:bufexplorer_version = "7.0.17"
 
 " Check to make sure the Vim version 700 or greater.
 if v:version < 700
-  echo "Sorry, bufexplorer ".g:loaded_bufexplorer."\nONLY runs with Vim 7.0 and greater"
+  echo "Sorry, bufexplorer ".g:bufexplorer_version."\nONLY runs with Vim 7.0 and greater"
   finish
 endif
 
@@ -69,6 +69,7 @@ call s:Set("g:bufExplorerDetailedHelp", 0) " Show detailed help?
 call s:Set("g:bufExplorerReverseSort", 0) " Sort reverse?
 call s:Set("g:bufExplorerShowDirectories", 1) " Show directories? (Dir's are added by commands like ':e .')
 call s:Set("g:bufExplorerShowRelativePath", 0) " Show listings with relative or absolute paths?
+call s:Set("g:bufExplorerShowUnlisted", 0) " Show unlisted buffers?
 call s:Set("g:bufExplorerSortBy", "mru") " Sorting methods are in s:sort_by:
 call s:Set("g:bufExplorerSplitBelow", &splitbelow) " Show horizontal splits below or above?
 call s:Set("g:bufExplorerSplitHorzSize", 0) " Height for a horizontal split.
@@ -77,22 +78,31 @@ call s:Set("g:bufExplorerSplitRight", &splitright) " Show vertical splits right 
 call s:Set("g:bufExplorerSplitVertical", 0) " Show splits horizontal or vertical?
 call s:Set("g:bufExplorerSplitVertSize", 0) " Height for a vertical split.
 call s:Set("g:bufExplorerUseCurrentWindow", 0) " Open selected buffer in current or new window.
+
+" Variable initialization.
+let s:MRUList = []
+let s:running = 0
 let s:sort_by = ["number", "name", "fullpath", "mru", "extension"]
+let s:types = {"fullname": ':p', "path": ':p:h', "relativename": ':~:.', "relativepath": ':~:.:h', "shortname": ':t'}
 
 " Setup the autocommands that handle the MRUList and other stuff. {{{1
 augroup bufexplorer
   autocmd!
-  autocmd BufNew * call <SID>MRUPush()
-  autocmd BufEnter * call <SID>MRUPush()
+  autocmd BufEnter,BufNew * call <SID>MRUPush(bufnr("%"))
   autocmd BufEnter * call <SID>SetAltBufName()
-  autocmd BufDelete * call <SID>MRUPop()
+  autocmd BufDelete * call <SID>MRUPop(bufnr("%"))
   autocmd BufWinEnter \[BufExplorer\] call <SID>Initialize()
   autocmd BufWinLeave \[BufExplorer\] call <SID>Cleanup()
   autocmd VimEnter * call <SID>BuildMRU()
 augroup End
 
 " Create commands {{{1
-command BufExplorer :call <SID>StartBufExplorer("drop")
+if has("gui")
+  command BufExplorer :call <SID>StartBufExplorer("drop")
+else
+  command BufExplorer :call <SID>StartBufExplorer("edit")
+end
+
 command SBufExplorer  :call <SID>StartBufExplorer("sp")
 command VSBufExplorer :call <SID>StartBufExplorer("vsp")
 
@@ -100,9 +110,6 @@ command VSBufExplorer :call <SID>StartBufExplorer("vsp")
 map <silent> <unique> <Leader>be :BufExplorer<CR>
 map <silent> <unique> <Leader>bs :SBufExplorer<CR>
 map <silent> <unique> <Leader>bv :VSBufExplorer<CR>
-
-let s:MRUList = []
-let s:running = 0
 
 " Winmanager Integration {{{1
 let g:BufExplorer_title = "\[Buf\ List\]"
@@ -210,7 +217,7 @@ function s:StartBufExplorer(open)
     " Go to the open buffer.
     if has("gui")
       exec "drop" name
-    end
+    endif
 
     return
   endif
@@ -299,6 +306,7 @@ function s:MapKeys()
   nnoremap <buffer> <silent> s :call <SID>SortSelect()<cr>
   nnoremap <buffer> <silent> S :call <SID>SelectBuffer(1)<cr>
   nnoremap <buffer> <silent> t :call <SID>ToggleSplitType()<cr>
+  nnoremap <buffer> <silent> u :call <SID>ToggleShowUnlisted()<cr>
 
   for k in ["G", "n", "N", "L", "M", "H"]
     exec "nnoremap <buffer> <silent>" k ":keepjumps normal!" k."<cr>"
@@ -343,6 +351,7 @@ function s:SetupSyntax()
     hi def link bufExplorerHidBuf Constant
     hi def link bufExplorerLockedBuf Special
     hi def link bufExplorerModBuf Exception
+    hi def link bufExplorerUnlBuf Comment
   endif
 endfunction
 
@@ -377,7 +386,7 @@ function s:CreateHelp()
   let header = []
 
   if g:bufExplorerDetailedHelp == 1
-    call add(header, '" Buffer Explorer ('.g:loaded_bufexplorer.')')
+    call add(header, '" Buffer Explorer ('.g:bufexplorer_version.')')
     call add(header, '" --------------------------')
     call add(header, '" <F1> : toggle this help')
     call add(header, '" <enter> or Mouse-Double-Click : open buffer under cursor')
@@ -394,6 +403,7 @@ function s:CreateHelp()
     call add(header, '" R : toggle showing relative or full paths')
     call add(header, '" s : select sort field '.string(s:sort_by).'')
     call add(header, '" t : toggle split type')
+    call add(header, '" u : toggle showing unlisted buffers')
   else
     call add(header, '" Press <F1> for Help')
   endif
@@ -409,53 +419,40 @@ endfunction
 " GetBufferList {{{1
 function s:GetBufferList()
   redir => bufoutput
-  buffers
+  buffers!
   redir END
 
-  let bufs = split(bufoutput, '\n')
-  let [all, widths, s:maxWidths] = [[], {}, {}]
-  let s:types = ["fullname", "relativename", "relativepath", "path", "shortname"]
-  for n in s:types
-    let widths[n] = []
+  let [all, allwidths, listedwidths] = [[], {}, {}]
+  for n in keys(s:types)
+    let allwidths[n] = []
+    let listedwidths[n] = []
   endfor
 
-  for buf in bufs
-    let b = {}
-    let bufName = matchstr(buf, '"\zs.\+\ze"')
-    let nameonly = fnamemodify(bufName, ":t")
+  for buf in split(bufoutput, '\n')
+    let bits = split(buf, '"')
+    let b = {"attributes": bits[0], "line": substitute(bits[2], '\s*', '', '')}
 
-    if (nameonly =~ '^\[.\+\]')
-      let b["relativename"] = nameonly
-      let b["fullname"] = nameonly
-      let b["shortname"] = nameonly
-      let b["relativepath"] = ""
-      let b["path"] = ""
-    else
-      let b["relativename"] = fnamemodify(bufName, ':~:.')
-      let b["fullname"] = fnamemodify(bufName, ":p")
-
-      if getftype(b["fullname"]) == "dir" && g:bufExplorerShowDirectories == 1
-        let b["shortname"] = "<DIRECTORY>"
-      else
-        let b["shortname"] = fnamemodify(bufName, ":t")
-      end
-
-      let b["relativepath"] = fnamemodify(b["relativename"], ':h')
-      let b["path"] = fnamemodify(b["fullname"], ":h")
-    endif
-
-    let b["attributes"] = matchstr(buf, '^\zs.\{-1,}\ze"')
-    let b["line"] = matchstr(buf, 'line \d\+')
+    for [key, val] in items(s:types)
+      let b[key] = fnamemodify(bits[1], val)
+    endfor
+    if getftype(b.fullname) == "dir" && g:bufExplorerShowDirectories == 1
+      let b.shortname = "<DIRECTORY>"
+    end
 
     call add(all, b)
 
-    for n in s:types
-      call add(widths[n], len(b[n]))
+    for n in keys(s:types)
+      call add(allwidths[n], len(b[n]))
+      if b.attributes !~ "u"
+        call add(listedwidths[n], len(b[n]))
+      endif
     endfor
   endfor
 
-  for n in s:types
-    let s:maxWidths[n] = max(widths[n])
+  let [s:allpads, s:listedpads] = [{}, {}]
+  for n in keys(s:types)
+    let s:allpads[n] = repeat(' ', max(allwidths[n]))
+    let s:listedpads[n] = repeat(' ', max(listedwidths[n]))
   endfor
 
   return all
@@ -464,37 +461,38 @@ endfunction
 " BuildBufferList {{{1
 function s:BuildBufferList()
   let lines = []
-  let pads = {}
-
-  for n in s:types
-    let pads[n] = repeat(' ', s:maxWidths[n])
-  endfor
 
   " Loop through every buffer.
   for buf in s:raw_buffer_listing
-    let line = buf["attributes"]." "
+    if (!g:bufExplorerShowUnlisted && buf.attributes =~ "u")
+      " skip unlisted buffers if we are not to show them
+      continue
+    endif
+
+    let line = buf.attributes." "
 
     if g:bufExplorerSplitOutPathName
       let type = (g:bufExplorerShowRelativePath) ? "relativepath" : "path"
       let path = buf[type]
-      let line .= buf["shortname"]." ".strpart(pads["shortname"].path, len(buf["shortname"]))
+      let pad  = (g:bufExplorerShowUnlisted) ? s:allpads.shortname : s:listedpads.shortname
+      let line .= buf.shortname." ".strpart(pad.path, len(buf.shortname))
     else
       let type = (g:bufExplorerShowRelativePath) ? "relativename" : "fullname"
       let path = buf[type]
       let line .= path
     endif
 
+    let pads = (g:bufExplorerShowUnlisted) ? s:allpads : s:listedpads
+
     if !empty(pads[type])
       let line .= strpart(pads[type], len(path))." "
     endif
-
-    let line .= buf["line"]
+    let line .= buf.line
 
     call add(lines, line)
   endfor
 
   call setline(s:firstBufferLine, lines)
-
   call s:SortListing()
 endfunction
 
@@ -521,24 +519,16 @@ function s:SelectBuffer(split)
   end
 
   if bufexists(_bufNbr)
+    if bufnr("#") == _bufNbr
+      return s:Close()
+    endif
+
     let ka = "keepalt"
 
     if (g:bufExplorerUseCurrentWindow && s:splitWindow) || (!s:splitWindow && a:split)
       " we will return to the previous buffer before opening the new one, so
       " be sure to not use the keepalt modifier
       silent bd!
-      let ka = ""
-    endif
-
-    if bufnr("#") == _bufNbr
-      " we are about to set the % # buffers to the same thing, so open the
-      " original alt buffer first to restore it. This only happens when
-      " selecting the current (%) buffer.
-      try
-        exe "keepjumps silent b!" s:altBufNbr
-      catch
-      endtry
-
       let ka = ""
     endif
 
@@ -551,20 +541,20 @@ function s:SelectBuffer(split)
 endfunction
 
 " RemoveBuffer {{{1
-function s:RemoveBuffer(buf)
+function s:RemoveBuffer(bufNbr)
   " This routine assumes that the buffer to be removed is on the current line
   try
-    exe "silent bw ".a:buf
+    exe "silent bw ".a:bufNbr
 
     setlocal modifiable
     " "_dd does not move the cursor (d _ does)
     normal! "_dd
     setlocal nomodifiable
 
-    call s:MRUPop(a:buf)
+    call s:MRUPop(a:bufNbr)
 
     " Delete the buffer from the raw buffer list
-    call filter(s:raw_buffer_listing, 'v:val["attributes"] !~ " '.a:buf.' "')
+    call filter(s:raw_buffer_listing, 'v:val["attributes"] !~ " '.a:bufNbr.' "')
   catch
     call s:Error(v:exception)
   endtry
@@ -688,15 +678,22 @@ function s:ToggleShowRelativePath()
 endfunction
 
 " RebuildBufferList {{{1
-function s:RebuildBufferList()
+function s:RebuildBufferList(...)
   setlocal modifiable
 
   let curPos = getpos('.')
 
-  call s:BuildBufferList()
+  if a:0
+    " clear the list first
+    exec s:firstBufferLine.',$d "_'
+  endif
+
+  let num_buffers = s:BuildBufferList()
   call setpos('.', curPos)
 
   setlocal nomodifiable
+
+  return num_buffers
 endfunction
 
 " ToggleOpenMode {{{1
@@ -709,6 +706,12 @@ endfunction
 function s:ToggleSplitType()
   let g:bufExplorerSplitVertical = !g:bufExplorerSplitVertical
   call s:UpdateHelpStatus()
+endfunction
+
+" ToggleShowUnlisted()
+function s:ToggleShowUnlisted()
+  let g:bufExplorerShowUnlisted = !g:bufExplorerShowUnlisted
+  let num_bufs = s:RebuildBufferList(g:bufExplorerShowUnlisted == 0)
 endfunction
 
 " UpdateHelpStatus {{{1
@@ -798,34 +801,27 @@ function s:SetAltBufName()
 endfunction
 
 " MRUPush {{{1
-function s:MRUPush()
-  let bufNbr = str2nr(expand('<abuf>'))
-
+function s:MRUPush(bufNbr)
   " Skip temporary buffer with buftype set.
   " Don't add the BufExplorer window to the list.
-  if !empty(getbufvar(bufNbr, "&buftype")) ||
-        \ !buflisted(bufNbr) ||
-        \ fnamemodify(bufname(bufNbr), ":t") == "[BufExplorer]"
+  if !empty(getbufvar(a:bufNbr, "&buftype")) ||
+      \ !buflisted(a:bufNbr) || empty(bufname(a:bufNbr)) ||
+      \ fnamemodify(bufname(a:bufNbr), ":t") == "[BufExplorer]"
     return
   end
 
-  call s:MRUPop(bufNbr)
-  call insert(s:MRUList, bufNbr)
+  call s:MRUPop(a:bufNbr)
+  call insert(s:MRUList, a:bufNbr)
 endfunction
 
 " MRUPop {{{1
-function s:MRUPop(...)
-  let idx = index(s:MRUList, (a:0) ? a:1 : bufnr("%"))
-
-  if (idx != -1)
-    call remove(s:MRUList, idx)
-  endif
+function s:MRUPop(bufNbr)
+  call filter(s:MRUList, 'v:val != '.a:bufNbr)
 endfunction
 
 " BuildMRU {{{1
 function s:BuildMRU()
   let s:MRUList = range(1, bufnr('$'))
-  call filter(s:MRUList, 'buflisted(v:val)')
 endfunction
 
 " MRUListShow {{{1
