@@ -1,13 +1,13 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 23 Jun 2007
+*bufexplorer.txt*              Buffer Explorer       Last Change: 02 Nov 2007
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.0.17
+                                Version 7.1.2
 
-Plugin for easily exploring (or browsing) open buffers
+Plugin for easily exploring (or browsing) Vim |:buffers|.
 
 |bufexplorer-usage|          Usage
+|bufexplorer-installation|   Installation
 |bufexplorer-customization|  Customization
-|add-local-help|             How to add this help file to vim's help
 |bufexplorer-changelog|      Change Log
 |bufexplorer-todo|           Todo
 |bufexplorer-credits|        Credits
@@ -18,27 +18,50 @@ This plugin is only available if 'compatible' is not set.
 {Vi does not have any of this}
 
 ==============================================================================
+INSTALLATION                                        *bufexplorer-installation*
+
+To install:
+  - Download the bufexplorer.zip.
+  - Extract the zip archive into your runtime directory.
+    The archive contains plugin/bufexplorer.vim, and doc/bufexplorer.txt.
+  - Start Vim or goto an existing instance of Vim.
+  - Execute the following command:
+>
+      :helptag <your runtime directory/doc
+<
+    This will generate all the help tags for any file located in the doc
+    directory.
+
+==============================================================================
 USAGE                                                      *bufexplorer-usage*
 
 To start exploring in the current window, use: >
- \be  or  :BufExplorer
-To start exploring in a newly split window, use: >
- \bs  or  :SBufExplorer
-To start exploring in a newly (forced) vertical split window, use: >
- \bv  or  :VSBufExplorer
 
-Note: If the current buffer is modified, the current window is always
-      split.
+ \be   OR  :BufExplorer
 
-Command to use once exploring:
+If you would like to use something other than '\', you may simply change the
+leader (see |mapleader|).
 
- <F1>          Toggle help information.
- <cr> or       Opens the buffer that is under the cursor into the current
- <leftmouse>   window.
- S             Opens the buffer that is under the cursor into a newly split
+Note: If the current buffer is modified when bufexplorer started, the current
+      window is always split and the new bufexplorer is displayed in that new
+      window.
+
+Commands to use once exploring:
+
+ <enter>       Opens the buffer that is under the cursor into the current
                window.
- d             Deletes the buffer from the list that is under the cursor.
- o             Toggles open mode. Only available in 'split mode'.
+ <F1>          Toggle help information.
+ <leftmouse>   Opens the buffer that is under the cursor into the current
+               window.
+ <shift-enter> Opens the buffer that is under the cursor in another tab.
+ d             |:wipeout| the buffer under the cursor from the list.
+               When a buffers is wiped, it will not be shown when unlisted
+               buffer are displayed.
+ D             |:delete| the buffer under the cursor from the list.
+               The buffer's 'buflisted' is cleared. This allows for the buffer
+               to be displayed again using the 'show unlisted' command.
+ f             Toggles whether you are taken to the active window when
+               selecting a buffer or not.
  p             Toggles the showing of a split filename/pathname.
  q             Quit exploring.
  r             Reverses the order the buffers are listed in.
@@ -46,13 +69,8 @@ Command to use once exploring:
  s             Selects the order the buffers are listed in. Either by buffer
                number, file name, file extension, most recently used (MRU), or
                full path.
- t             Toggles split type. Only available in 'split mode'.
-
-Typically one would put bufexplorer.vim into the .vim/plugin directory
-(vimfiles\plugin for Windows) where it becomes automatically available
-for use. It sets up it's default keymaps to use \be and \bs. If you would
-like to use something other than '\', you may simply change the leader
-(see |mapleader|).
+ t             Opens the buffer that is under the cursor in another tab.
+ u             Toggles the showing of "unlisted" buffers.
 
 Once invoked, Buffer Explorer displays a sorted list (MRU is the default
 sort method) of all the buffers that are currently opened. You are then
@@ -60,10 +78,6 @@ able to move the cursor to the line containing the buffer's name you are
 wanting to act upon. Once you have selected the buffer you would like,
 you can then either open it, close it(delete), resort the list, reverse
 the sort, quit exploring and so on...
-
-You can avoid loading this plugin by setting the "loaded_bufexplorer"
-variable: >
-  :let loaded_bufexplorer = 1
 
 ===============================================================================
 CUSTOMIZATION                                       *bufexplorer-customization*
@@ -76,21 +90,29 @@ The default is to show the default help.
 
                                                     *g:bufExplorerDetailedHelp*
 To control whether detailed help is display by, use: >
-  let g:bufExplorerDetailedHelp=1
-The default is not to show detailed help.
+  let g:bufExplorerDetailedHelp=0      " Do not show detailed help.
+  let g:bufExplorerDetailedHelp=1      " Show detailed help.
+The default is NOT to show detailed help.
+
+                                                      *g:bufExplorerFindActive*
+To control whether you are taken to the active window when selecting a buffer,
+use: >
+  let g:bufExplorerFindActive=0        " Do not go to active window.
+  let g:bufExplorerFindActive=1        " Go to active window.
+The default is to be taken to the active window.
 
                                                      *g:bufExplorerReverseSort*
 To control whether to sort the buffer in reverse order or not, use: >
   let g:bufExplorerReverseSort=0       " Do not sort in reverse order.
   let g:bufExplorerReverseSort=1       " Sort in reverse order.
-The default is not to sort in reverse order.
+The default is NOT to sort in reverse order.
 
                                                  *g:bufExplorerShowDirectories*
 Directories usually show up in the list from using a command like ":e .".
 To control whether to show directories in the buffer list or not, use: >
   let g:bufExplorerShowDirectories=1   " Show directories.
   let g:bufExplorerShowDirectories=0   " Don't show directories.
-Note: This is only available when using vim 7.0 and above.
+The default is to show directories.
 
                                                 *g:bufExplorerShowRelativePath*
 To control whether to show absolute paths or relative to the current
@@ -98,6 +120,12 @@ directory, use: >
   let g:bufExplorerShowRelativePath=0  " Show absolute paths.
   let g:bufExplorerShowRelativePath=1  " Show relative paths.
 The default is to show absolute paths.
+
+                                                    *g:bufExplorerShowUnlisted*
+To control whether to show unlisted buffer or not, use: >
+  let g:bufExplorerShowUnlisted=0      " Do not show unlisted buffers.
+  let g:bufExplorerShowUnlisted=1      " Show unlisted buffers.
+The default is to NOT show unlisted buffers.
 
                                                           *g:bufExplorerSortBy*
 To control what field the buffers are sorted by, use: >
@@ -108,20 +136,6 @@ To control what field the buffers are sorted by, use: >
   let g:bufExplorerSortBy='number'     " Sort by the buffer's number.
 The default is to sort by mru.
 
-                                                      *g:bufExplorerSplitBelow*
-To control where the new split window will be placed above or below the
-current window, use: >
-  let g:bufExplorerSplitBelow=1        " Split new window below current.
-  let g:bufExplorerSplitBelow=0        " Split new window above current.
-The default is to use what ever is set by the global &splitbelow
-variable.
-
-                                                   *g:bufExplorerSplitHorzSize*
-To control the height of the window When opening a new window horizontally
-use: >
-  let g:bufExplorerSplitHorzSize = [height]
-The default is 0, which is to use half the existing height.
-
                                                 *g:bufExplorerSplitOutPathName*
 To control whether to split out the path and file name or not, use: >
   let g:bufExplorerSplitOutPathName=1  " Split the path and file name.
@@ -129,35 +143,29 @@ To control whether to split out the path and file name or not, use: >
                                        " name.
 The default is to split the path and file name.
 
-                                                      *g:bufExplorerSplitRight*
-To control when opening a new window, if the new window is split to the
-right or to the left of the current window, use: >
-  let g:bufExplorerSplitRight=0        " Split left.
-  let g:bufExplorerSplitRight=1        " Split right.
-The default is to use the global &splitright.
-
-                                                   *g:bufExplorerSplitVertical*
-To control when opening a new window, if the current is split
-horizontally or vertically, use: >
-  let g:bufExplorerSplitVertical=0     " Split horizontally.
-  let g:bufExplorerSplitVertical=1     " Split vertically.
-The default is horizontally.
-
-                                                   *g:bufexplorerSplitVertSize*
-To control the width of the window when opening a new window vertically
-use: >
-  let g:bufExplorerSplitVertSize = [width]
-The default is 0, which is to use half the existing width.
-
-                                                *g:bufExplorerUseCurrentWindow*
-To control where the selected buffer is opened, use: >
-  let g:bufExplorerUseCurrentWindow=0  " Open in new window.
-  let g:bufExplorerUseCurrentWindow=1  " Open using current window.
-The default is to use a new window.
-
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.1.2  - Fixes:
+         * Fixed a jumplist issue spotted by JiangJun. I overlooked the
+           'jumplist' and with a couple calls to 'keepjumps', everything is
+           fine again.
+         * Went back to just having a plugin file, no autoload file. By having
+           the autoload, WinManager was no longer working and without really
+           digging into the cause, it was easier to go back to using just a
+           plugin file.
+7.1.1  - Fixes:
+         * A problem spotted by Thomas Arendsen Hein.
+           When running Vim (7.1.94), error E493 was being thrown.
+         Enhancements:
+         * Added 'D' for 'delete' buffer as the 'd' command was a 'wipe'
+           buffer.
+7.1.0  - Another 'major' update, some by Dave Larson, some by me.
+         * Making use of 'autoload' now to make the plugin load quicker.
+         * Removed '\bs' and '\bv'. These are now controlled by the user. The
+           user can issue a ':sp' or ':vs' to create a horizontal or vertical
+           split window and then issue a '\be'
+         * Added handling of tabs.
 7.0.17 - Fixed issue with 'drop' command.
          Various enhancements and improvements.
 7.0.16 - Fixed issue reported by Liu Jiaping on non Windows systems, which was
@@ -364,29 +372,9 @@ CHANGE LOG                                              *bufexplorer-changelog*
 ===============================================================================
 TODO                                                         *bufexplorer-todo*
 
-- Erwin Waterlander suggestion of being able to open the explorer with one
-  buffer.
+- The issuing of a ':bd' command does not always remove the buffer number from
+  the MRU list.
 
-- Fix issue reported by Liu Jiaping on non Windows systems, in which doing
-
-  Open file1, open file2, modify file1, open bufexplorer, you get the
-  following error:
-
-  --------8<--------
-  Error detected while processing function
-  <SNR>14_StartBufExplorer..<SNR>14_SplitOpen:
-  line    4:
-  E37: No write since last change (add ! to override)
-  --------8<--------
-
-  But the worse thing is, when I want to save the current buffer and
-  type ':w', I get another error message:
-
-  --------8<--------
-  E382: Cannot write, 'buftype' option is set 
-  --------8<--------
-
-  It has to do with the use of the 'drop' command.
 ===============================================================================
 CREDITS                                                   *bufexplorer-credits*
 
