@@ -8,11 +8,11 @@
 "               event will the copyright holder be liable for any damages
 "               resulting from the use of this software.
 " Name Of File: bufexplorer.vim
-"  Description: Buffer Explorer Vim Autoload file
+"  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Monday, 05 November 2007
+" Last Changed: Thursday, 15 November 2007
 "      Version: See g:bufexplorer_version for version number.
-"        Usage: This file should reside in the autoload directory and be
+"        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
 "
 "               You may use the default keymappings of
@@ -27,15 +27,14 @@
 "      History: See supplied documentation.
 "=============================================================================
 
-" Check compatibility {{{1
-" Exit quickly when 'compatible' is set.
-if &cp
+" Exit quickly if already running or when 'compatible' is set. {{{1
+if exists("g:bufexplorer_version") || &cp
   finish
 endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.1.2"
+let g:bufexplorer_version = "7.1.3"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -45,9 +44,11 @@ endif
 
 " Public Interface {{{1
 nmap <silent> <unique> <Leader>be :BufExplorer<CR>
+"XXXXX nmap <silent> <unique> <Leader>bs :SBufExplorer<CR>
 
 " Create commands {{{1
-command BufExplorer :call StartBufExplorer(has("gui")?"drop": "hide edit")
+command BufExplorer :call StartBufExplorer(has ("gui") ? "drop" : "hide edit")
+"XXXXX command SBufExplorer :call StartBufExplorer(has ("gui") ? "sp" : "hide edit")
 
 " Set {{{1
 function s:Set(var, default)

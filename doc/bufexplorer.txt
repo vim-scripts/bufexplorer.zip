@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 02 Nov 2007
+*bufexplorer.txt*              Buffer Explorer       Last Change: 15 Nov 2007
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.1.2
+                                Version 7.1.3
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -146,6 +146,9 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.1.3  - Fixes:
+         * Added code to allow only one instance of the plugin to run at a
+           time. Thanks Dennis Hostetler.
 7.1.2  - Fixes:
          * Fixed a jumplist issue spotted by JiangJun. I overlooked the
            'jumplist' and with a couple calls to 'keepjumps', everything is
