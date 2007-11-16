@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 15 Nov 2007
+*bufexplorer.txt*              Buffer Explorer       Last Change: 16 Nov 2007
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.1.3
+                                Version 7.1.4
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -146,6 +146,12 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.1.4  - Fixes:
+         * Sometimes when a file's path has 'white space' in it, extra buffers
+           would be created containing each piece of the path. i.e:
+           opening c:\document and settings\test.txt would create a buffer
+           named "and" and a buffer named "Documents". This was reported and
+           fixed by TaCa Yoss.
 7.1.3  - Fixes:
          * Added code to allow only one instance of the plugin to run at a
            time. Thanks Dennis Hostetler.
@@ -377,6 +383,7 @@ TODO                                                         *bufexplorer-todo*
 
 - The issuing of a ':bd' command does not always remove the buffer number from
   the MRU list.
+- Look into adding '\bs' (buffer split) command back into the code.
 
 ===============================================================================
 CREDITS                                                   *bufexplorer-credits*
