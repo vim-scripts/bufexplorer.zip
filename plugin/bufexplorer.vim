@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Friday, 16 November 2007
+" Last Changed: Friday, 30 November 2007
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -34,7 +34,7 @@ endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.1.4"
+let g:bufexplorer_version = "7.1.5"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -514,7 +514,8 @@ function s:SelectBuffer(...)
     if bufloaded(_bufNbr) && g:bufExplorerFindActive
       call s:Close()
       let bufname = expand("#"._bufNbr.":p")
-      exec "drop" substitute(bufname, "\\s", "\\\\ ", "g")
+"      exec "drop" substitute(bufname, "\\s", "\\\\ ", "g")
+      exec bufname ? "drop ".substitute(bufname, "\\s", "\\\\ ", "g") : "buffer "._bufNbr
     elseif (a:0)
       call s:Close()
       tabnew

@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 16 Nov 2007
+*bufexplorer.txt*              Buffer Explorer       Last Change: 30 Nov 2007
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.1.4
+                                Version 7.1.5
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -146,6 +146,8 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.1.5  - Fixes:
+         * Could not open unnamed buffers. Fixed by TaCahiroy.
 7.1.4  - Fixes:
          * Sometimes when a file's path has 'white space' in it, extra buffers
            would be created containing each piece of the path. i.e:
@@ -396,4 +398,4 @@ helped and gave me suggestions. I wouldn't want to leave anyone out so I
 won't list names.
 
 ===============================================================================
-vim:tw=78:noet:wrap:ts=8:ft=help:norl:
+vim:tw=78:noet:wrap:ts=8:ft=help:ff=unix:norl:
