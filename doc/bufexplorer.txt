@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 30 Nov 2007
+*bufexplorer.txt*              Buffer Explorer       Last Change: 02 Dec 2007
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.1.5
+                                Version 7.1.6
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -146,6 +146,9 @@ The default is to split the path and file name.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.1.6  - Fixes:
+         * Removed ff=unix from modeline in bufexplorer.txt. Found by Bill
+           McCarthy.
 7.1.5  - Fixes:
          * Could not open unnamed buffers. Fixed by TaCahiroy.
 7.1.4  - Fixes:
@@ -398,4 +401,4 @@ helped and gave me suggestions. I wouldn't want to leave anyone out so I
 won't list names.
 
 ===============================================================================
-vim:tw=78:noet:wrap:ts=8:ft=help:ff=unix:norl:
+vim:tw=78:noet:wrap:ts=8:ft=help:norl:
