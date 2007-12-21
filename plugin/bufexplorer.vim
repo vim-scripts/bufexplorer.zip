@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Sunday, 02 December 2007
+" Last Changed: Friday, 21 December 2007
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -34,7 +34,7 @@ endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.1.6"
+let g:bufexplorer_version = "7.1.7"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -62,7 +62,6 @@ function s:Set(var, default)
 
   return 0
 endfunction
-"1}}}
 
 " Default values {{{1
 call s:Set("g:bufExplorerDefaultHelp", 1) " Show default help?
@@ -81,6 +80,7 @@ let s:running = 0
 let s:sort_by = ["number", "name", "fullpath", "mru", "extension"]
 let s:tabSpace = []
 let s:types = {"fullname": ':p', "path": ':p:h', "relativename": ':~:.', "relativepath": ':~:.:h', "shortname": ':t'}
+let s:originBuffer = 0
 
 " Setup the autocommands that handle the MRUList and other stuff. {{{1
 autocmd VimEnter * call s:Setup()
@@ -205,6 +205,7 @@ function StartBufExplorer(open)
     return
   endif
 
+  let s:originBuffer = bufnr("%")
   silent let s:raw_buffer_listing = s:GetBufferInfo()
 
   let copy = copy(s:raw_buffer_listing)
@@ -510,22 +511,35 @@ function s:SelectBuffer(...)
       return s:Close()
     endif
 
-    " If the buf is active, then go to the tab where it is opened.
-    if bufloaded(_bufNbr) && g:bufExplorerFindActive
-      call s:Close()
-      let bufname = expand("#"._bufNbr.":p")
-"      exec "drop" substitute(bufname, "\\s", "\\\\ ", "g")
-      exec bufname ? "drop ".substitute(bufname, "\\s", "\\\\ ", "g") : "buffer "._bufNbr
-    elseif (a:0)
-      call s:Close()
-      tabnew
+    if (a:0 == 1) && (a:1 == "tab")
+      " Restore [BufExplorer] buffer.
+      exec "keepjumps silent buffer!".s:originBuffer
+
+      let tabNbr = s:GetTabNbr(_bufNbr)
+
+      if tabNbr == 0
+        " _bufNbr is not opened in any tabs
+        exec "999tab split +buffer" . _bufNbr
+      else
+        " _bufNbr is already opened in tab(s)
+        exec tabNbr . "tabnext"
+        " Focus window.
+        exec s:GetWinNbr(tabNbr, _bufNbr) . "wincmd w"
+      endif
+    else
+      " If the buf is active, then go to the tab where it is opened.
+      if bufloaded(_bufNbr) && g:bufExplorerFindActive
+        call s:Close()
+        let bufname = expand("#"._bufNbr.":p")
+        exec bufname ? "drop ".escape(bufname, " ") : "buffer "._bufNbr
+      endif
+
+      " Switch to the buffer.
+      exec "keepalt keepjumps silent b!" _bufNbr
     endif
 
     " Make the buffer 'listed' again.
     call setbufvar(_bufNbr, "&buflisted", "1")
-
-    " Switch to the buffer.
-    exec "keepalt keepjumps silent b!" _bufNbr
   else
     call s:Error("Sorry, that buffer no longer exists, please select another")
     call s:DeleteBuffer(_bufNbr, "wipe")
@@ -738,6 +752,24 @@ function s:Warn(msg)
   echohl WarningMsg | echo a:msg | echohl none
 endfunction
 
+" GetTabNbr {{{1
+function s:GetTabNbr(bufNbr)
+  " Searching buffer bufno, in tabs.
+  for i in range(tabpagenr("$"))
+    if index(tabpagebuflist(i + 1), a:bufNbr) != -1
+      return i + 1
+    endif
+  endfor
+
+  return 0
+endfunction
+
+" GetWinNbr" {{{1
+function s:GetWinNbr(tabNbr, bufNbr)
+  " window number in tabpage.
+  return index(tabpagebuflist(a:tabNbr), a:bufNbr) + 1
+endfunction
+
 " Winmanager Integration {{{1
 let g:BufExplorer_title = "\[Buf\ List\]"
 call s:Set("g:bufExplorerResize", 1)
@@ -788,6 +820,6 @@ function BufExplorer_ReSize()
 
   call setpos(".", pres)
 endfunction
-"1}}}
+"}}}1
 
 " vim:ft=vim foldmethod=marker sw=2
