@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Friday, 15 Aug 2008
+" Last Changed: Tuesday, 02 Sep 2008
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -38,7 +38,7 @@ endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.2.0"
+let g:bufexplorer_version = "7.2.1"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -297,7 +297,7 @@ endfunction
 " MapKeys {{{1
 function s:MapKeys()
   if exists("b:displayMode") && b:displayMode == "winmanager"
-    nnoremap <buffer> <silent> <tab> :call <SID>SelectBuffer()<cr>
+    nnoremap <buffer> <silent> <tab> :call <SID>SelectBuffer("tab")<cr>
   endif
 
   nnoremap <buffer> <silent> <F1>          :call <SID>ToggleHelp()<cr>
@@ -536,8 +536,12 @@ function s:SelectBuffer(...)
   if exists("b:displayMode") && b:displayMode == "winmanager"
     let bufname = expand("#"._bufNbr.":p")
 
-    call WinManagerFileEdit(bufname, 0)
-
+    if (a:0 == 1) && (a:1 == "tab")
+      call WinManagerFileEdit(bufname, 1)
+    else
+      call WinManagerFileEdit(bufname, 0)
+    endif
+ 
     return
   end
 

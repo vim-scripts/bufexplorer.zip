@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 15 Aug 2008
+*bufexplorer.txt*              Buffer Explorer       Last Change: 02 Sep 2008
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.2.0
+                                Version 7.2.1
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -164,6 +164,11 @@ The default is to use the global &splitright.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.2.1  - Fix:
+         * Thanks to Dimitar for spotting and fixing a feature that was
+           inadvertently left out of the previous version. The feature was
+           when bufexplorer was used together with WinManager, you could use
+           the tab key to open a buffer in a split window.
 7.2.0  - Enhancements:
          * For all those missing the \bs and \bv commands, these have now
            returned. Thanks to Phil O'Connell for asking for the return of
