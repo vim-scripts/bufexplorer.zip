@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 02 Sep 2008
+*bufexplorer.txt*              Buffer Explorer       Last Change: 19 Nov 2008
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.2.1
+                                Version 7.2.2
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -164,6 +164,10 @@ The default is to use the global &splitright.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.2.2  - Fix:
+         * Thanks to David L. Dight for spotting and fixing an issue when
+           using ctrl^. bufexplorer would incorrectly handle the previous
+           buffer so that when ctrl^ was pressed the incorrect file was opened.
 7.2.1  - Fix:
          * Thanks to Dimitar for spotting and fixing a feature that was
            inadvertently left out of the previous version. The feature was

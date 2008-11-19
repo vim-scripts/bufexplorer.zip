@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Tuesday, 02 Sep 2008
+" Last Changed: Wednesday, 19 Nov 2008
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -38,7 +38,7 @@ endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.2.1"
+let g:bufexplorer_version = "7.2.2"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -574,6 +574,9 @@ function s:SelectBuffer(...)
         if tabNbr != 0
                                 " The buffer is located in a tab. Go to that tab number.
           exec tabNbr . "tabnext"
+        else
+          let bufname = expand("#"._bufNbr.":p")
+          exec bufname ? "drop ".escape(bufname, " ") : "buffer "._bufNbr
         endif
       endif
                                 " Switch to the buffer.
