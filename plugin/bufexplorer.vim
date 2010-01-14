@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Tuesday, 15 Dec 2009
+" Last Changed: Wednesday, 06 Jan 2010
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -38,7 +38,7 @@ endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.2.3"
+let g:bufexplorer_version = "7.2.4"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -120,6 +120,7 @@ function! s:BESetup()
 
     autocmd BufWinEnter \[BufExplorer\] call s:BEInitialize()
     autocmd BufWinLeave \[BufExplorer\] call s:BECleanup()
+    autocmd SessionLoadPost * call s:BEReset()
   augroup END
 
   " Remove the VimEnter event as it is no longer needed
