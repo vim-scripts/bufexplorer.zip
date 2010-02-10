@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Wednesday, 06 Jan 2010
+" Last Changed: Tuesday, 02 Feb 2010
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -38,7 +38,7 @@ endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.2.4"
+let g:bufexplorer_version = "7.2.5"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -225,8 +225,10 @@ endfunction
 function! s:BEDeactivateBuffer(remove)
   let _bufnr = str2nr(expand("<abuf>"))
 
+  call s:BEMRUPop(_bufnr)
+
   if a:remove
-    call s:BEMRUPop(_bufnr)
+"XXX moved above    call s:BEMRUPop(_bufnr)
     call s:BEDeleteBufferListing(_bufnr)
   else
     if ! s:BEIgnoreBuffer(_bufnr) == 1
@@ -434,10 +436,17 @@ function! s:BEMapKeys()
   nnoremap <buffer> <silent> o             :call <SID>BESelectBuffer()<cr>
   nnoremap <buffer> <silent> t             :call <SID>BESelectBuffer("tab")<cr>
   nnoremap <buffer> <silent> <s-cr>        :call <SID>BESelectBuffer("tab")<cr>
-  nnoremap <buffer> <silent> d             :call <SID>BERemoveBuffer("wipe", "n")<cr>
-  xnoremap <buffer> <silent> d             :call <SID>BERemoveBuffer("wipe", "v")<cr>
-  nnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("delete", "n")<cr>
-  xnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("delete", "v")<cr>
+
+  nnoremap <buffer> <silent> d             :call <SID>BERemoveBuffer("delete", "n")<cr>
+  xnoremap <buffer> <silent> d             :call <SID>BERemoveBuffer("delete", "v")<cr>
+  nnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("wipe", "n")<cr>
+  xnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("wipe", "v")<cr>
+
+"XXX  nnoremap <buffer> <silent> d             :call <SID>BERemoveBuffer("wipe", "n")<cr>
+"XXX  xnoremap <buffer> <silent> d             :call <SID>BERemoveBuffer("wipe", "v")<cr>
+"XXX  nnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("delete", "n")<cr>
+"XXX  xnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("delete", "v")<cr>
+
   nnoremap <buffer> <silent> m             :call <SID>BEMRUListShow()<cr>
   nnoremap <buffer> <silent> p             :call <SID>BEToggleSplitOutPathName()<cr>
   nnoremap <buffer> <silent> q             :call <SID>BEClose()<cr>
@@ -849,6 +858,7 @@ function! s:BEDeleteBuffer(bufNbr, mode)
     "        \(10\|20\) - either a 10 or a 20
     "        \> - end of word (so it can't make 100 or 201)
     exec 'silent! g/^\s*\('.substitute(a:bufNbr, ' ', '\\|', 'g').'\)\>/d_'
+
     setlocal nomodifiable
 
     call s:BEDeleteBufferListing(a:bufNbr)
