@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 02 Feb 2010
+*bufexplorer.txt*              Buffer Explorer       Last Change: 10 Feb 2010
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.2.5
+                                Version 7.2.6
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -191,6 +191,10 @@ The default is not to show.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.2.6  - Fix:
+         * Thanks to Michael Henry for pointing out that I totally forgot to
+           update the inline help to reflect the previous change to the 'd'
+           and 'D' keys. Opps!
 7.2.5  - Fix:
          * Philip Morant suggested switching the command (bwipe) associated
            with the 'd' key with the command (bdelete) associated with the 'D'

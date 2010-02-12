@@ -1,5 +1,5 @@
 "==============================================================================
-"    Copyright: Copyright (C) 2001-2009 Jeff Lanzarotta
+"    Copyright: Copyright (C) 2001-2010 Jeff Lanzarotta
 "               Permission is hereby granted to use and distribute this code,
 "               with or without modifications, provided that this copyright
 "               notice is copied with it. Like anything else that's free,
@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Tuesday, 02 Feb 2010
+" Last Changed: Friday, 12 Feb 2010
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -38,7 +38,7 @@ endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.2.5"
+let g:bufexplorer_version = "7.2.6"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -560,8 +560,8 @@ function! s:BECreateHelp()
     call add(header, '" <F1> : toggle this help')
     call add(header, '" <enter> or o or Mouse-Double-Click : open buffer under cursor')
     call add(header, '" <shift-enter> or t : open buffer in another tab')
-    call add(header, '" D : delete buffer')
-    call add(header, '" d : wipe buffer')
+    call add(header, '" d : delete buffer')
+    call add(header, '" D : wipe buffer')
     call add(header, '" f : toggle find active buffer')
     call add(header, '" p : toggle spliting of file and path name')
     call add(header, '" q : quit')
