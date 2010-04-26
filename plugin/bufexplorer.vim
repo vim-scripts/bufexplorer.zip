@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Friday, 12 Feb 2010
+" Last Changed: Tuesday, 16 Feb 2010
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -38,7 +38,7 @@ endif
 "1}}}
 
 " Version number
-let g:bufexplorer_version = "7.2.6"
+let g:bufexplorer_version = "7.2.7"
 
 " Check for Vim version 700 or greater {{{1
 if v:version < 700
@@ -228,13 +228,9 @@ function! s:BEDeactivateBuffer(remove)
   call s:BEMRUPop(_bufnr)
 
   if a:remove
-"XXX moved above    call s:BEMRUPop(_bufnr)
     call s:BEDeleteBufferListing(_bufnr)
   else
-    if ! s:BEIgnoreBuffer(_bufnr) == 1
-      " If the buffer is unlisted, refresh the list.
-      let s:refreshBufferList = 1
-    endif
+    let s:refreshBufferList = 1
   endif
 endfunction
 
@@ -361,6 +357,7 @@ function! StartBufExplorer(open)
   " Add zero to ensure the variable is treated as a Number.
   let s:originBuffer = bufnr("%") + 0
 
+  " Create or rebuild the raw buffer list if necessary.
   if !exists('s:raw_buffer_listing') || 
         \ empty(s:raw_buffer_listing) ||
         \ s:refreshBufferList == 1
@@ -442,14 +439,9 @@ function! s:BEMapKeys()
   nnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("wipe", "n")<cr>
   xnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("wipe", "v")<cr>
 
-"XXX  nnoremap <buffer> <silent> d             :call <SID>BERemoveBuffer("wipe", "n")<cr>
-"XXX  xnoremap <buffer> <silent> d             :call <SID>BERemoveBuffer("wipe", "v")<cr>
-"XXX  nnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("delete", "n")<cr>
-"XXX  xnoremap <buffer> <silent> D             :call <SID>BERemoveBuffer("delete", "v")<cr>
-
   nnoremap <buffer> <silent> m             :call <SID>BEMRUListShow()<cr>
   nnoremap <buffer> <silent> p             :call <SID>BEToggleSplitOutPathName()<cr>
-  nnoremap <buffer> <silent> q             :call <SID>BEClose()<cr>
+  nnoremap <buffer> <silent> q             :call <SID>BEClose("quit")<cr>
   nnoremap <buffer> <silent> r             :call <SID>BESortReverse()<cr>
   nnoremap <buffer> <silent> R             :call <SID>BEToggleShowRelativePath()<cr>
   nnoremap <buffer> <silent> s             :call <SID>BESortSelect()<cr>
@@ -634,7 +626,7 @@ function! s:BEGetBufferInfo(bufnr)
     let s:listedpads[n] = repeat(' ', max(listedwidths[n]))
   endfor
 
-  let s:refreshBufferList = 0
+  let s:refreshBufferList = 1
 
   return all
 endfunction
@@ -649,8 +641,10 @@ function! s:BEBuildBufferList()
       " Skip unlisted buffers if we are not to show them.
       continue
     endif
+
     if (g:bufExplorerShowTabBuffer)
       let show_buffer = 0
+
       for bufnr in s:tabSpace[tabpagenr()]
         if (buf.attributes =~ '^\s*'.bufnr.'\>')
           " Only buffers shown on the current tabpagenr
@@ -658,6 +652,7 @@ function! s:BEBuildBufferList()
           break
         endif
       endfor
+
       if show_buffer == 0 
         continue
       endif
@@ -721,7 +716,7 @@ function! s:BESelectBuffer(...)
 
   if bufexists(_bufNbr)
     if bufnr("#") == _bufNbr
-      return s:BEClose()
+      return s:BEClose("")
     endif
 
     " Are we suppose to open the selected buffer in a tab?
@@ -751,7 +746,7 @@ function! s:BESelectBuffer(...)
       " Are we suppose to move to the tab where this active buffer is?
       if bufloaded(_bufNbr) && g:bufExplorerFindActive
         " Close the BE window.
-        call s:BEClose()
+        call s:BEClose("")
 
         " Get the tab number where this buffer is located at.
         let tabNbr = s:BEGetTabNbr(_bufNbr)
@@ -868,12 +863,13 @@ function! s:BEDeleteBuffer(bufNbr, mode)
 endfunction
 
 " BEClose {{{1
-function! s:BEClose()
+function! s:BEClose(mode)
   " Get only the listed buffers.
   let listed = filter(copy(s:MRUList), "buflisted(v:val)")
 
   " If we needed to split the main window, close the split one.
-  if (s:splitMode != "")
+"  if (s:splitMode)
+  if (s:splitMode != "" && a:mode == "quit")
     exec "wincmd c"
   endif
 

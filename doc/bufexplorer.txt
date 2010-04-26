@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 10 Feb 2010
+*bufexplorer.txt*              Buffer Explorer       Last Change: 16 Feb 2010
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.2.6
+                                Version 7.2.7
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -191,6 +191,10 @@ The default is not to show.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.2.7  - Fix:
+         * My 1st attempt to fix the "cache" issue where buffers information
+           has changed but the cache/display does not reflect those changes.
+           More work still needs to be done.
 7.2.6  - Fix:
          * Thanks to Michael Henry for pointing out that I totally forgot to
            update the inline help to reflect the previous change to the 'd'
