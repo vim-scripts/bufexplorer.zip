@@ -1,7 +1,7 @@
 *bufexplorer.txt*              Buffer Explorer       Last Change: 16 Feb 2010
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.2.7
+                                Version 7.2.8
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -106,6 +106,10 @@ WINDOW LAYOUT                                       *bufexplorer-windowlayout*
 ===============================================================================
 CUSTOMIZATION                                       *bufexplorer-customization*
 
+                                                          *g:bufExplorerChgWin*
+If set, bufexplorer will bring up the selected buffer in the window specified
+by g:bufExplorerChgWin.
+
                                                      *g:bufExplorerDefaultHelp*
 To control whether the default help is displayed or not, use: >
   let g:bufExplorerDefaultHelp=0       " Do not show default help.
@@ -124,6 +128,10 @@ use: >
   let g:bufExplorerFindActive=0        " Do not go to active window.
   let g:bufExplorerFindActive=1        " Go to active window.
 The default is to be taken to the active window.
+
+                                                         *g:bufExplorerFuncRef*
+When a buffer is selected, the functions specified either singly or as a list
+will be called.
 
                                                      *g:bufExplorerReverseSort*
 To control whether to sort the buffer in reverse order or not, use: >
@@ -144,6 +152,12 @@ directory, use: >
   let g:bufExplorerShowRelativePath=0  " Show absolute paths.
   let g:bufExplorerShowRelativePath=1  " Show relative paths.
 The default is to show absolute paths.
+
+                                                   *g:bufExplorerShowTabBuffer*
+To control weither or not to show buffers on for the specific tab or not, use: >
+  let g:bufExplorerShowTabBuffer=0        " No.
+  let g:bufExplorerShowTabBuffer=1        " Yes.
+The default is not to show.
 
                                                     *g:bufExplorerShowUnlisted*
 To control whether to show unlisted buffer or not, use: >
@@ -182,15 +196,12 @@ current window, use: >
   let g:bufExplorerSplitRight=1        " Split right.
 The default is to use the global &splitright.
 
-                                                   *g:bufExplorerShowTabBuffer*
-To control weither or not to show buffers on for the specific tab or not, use: >
-  let g:bufExplorerShowTabBuffer=0        " No.
-  let g:bufExplorerShowTabBuffer=1        " Yes.
-The default is not to show.
-
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.2.8  - Enhancements:
+         * Thanks to Charles Campbell for integrating bufexplorer with GDBMGR.
+           http://mysite.verizon.net/astronaut/vim/index.html#GDBMGR
 7.2.7  - Fix:
          * My 1st attempt to fix the "cache" issue where buffers information
            has changed but the cache/display does not reflect those changes.
