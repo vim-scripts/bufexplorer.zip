@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 16 Feb 2010
+*bufexplorer.txt*              Buffer Explorer       Last Change: 09 Oct 2012
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.2.8
+                                Version 7.3.0
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -37,11 +37,11 @@ To install:
 USAGE                                                      *bufexplorer-usage*
 
 To start exploring in the current window, use: >
- \be   or   :BufExplorer
+ \be   or   :BufExplorer   or   Your custom key mapping
 To start exploring in a newly split horizontal window, use: >
- \bs   or   :BufExplorerHorizontalSplit
+ \bs   or   :BufExplorerHorizontalSplit   or   Your custom key mapping
 To start exploring in a newly split vertical window, use: >
- \bv   or   :BufExplorerVerticalSplit
+ \bv   or   :BufExplorerVerticalSplit   or   Your custom key mapping
 
 If you would like to use something other than '\', you may simply change the
 leader (see |mapleader|).
@@ -58,11 +58,12 @@ Commands to use once exploring:
  <leftmouse>   Opens the buffer that is under the cursor into the current
                window.
  <shift-enter> Opens the buffer that is under the cursor in another tab.
+ B             Works in association with the|ShowTabBuffer|option.  If
+              |ShowTabBuffer|is set to 1, this toggles if BufExplorer is to
+               only store the most recent tab for this buffer or not.
  d            |:delete|the buffer under the cursor from the list.  The
                buffer's 'buflisted' is cleared. This allows for the buffer to
                be displayed again using the 'show unlisted' command.
- R             Toggles relative path/absolute path.
- T             Toggles to show only buffers for this tab or not.
  D            |:wipeout|the buffer under the cursor from the list.  When a
                buffers is wiped, it will not be shown when unlisted buffer are
                displayed.
@@ -71,11 +72,16 @@ Commands to use once exploring:
  o             Opens the buffer that is under the cursor into the current
                window.
  p             Toggles the showing of a split filename/pathname.
- q             Quit exploring.
+ q             Exit/Close bufexplorer.
  r             Reverses the order the buffers are listed in.
- s             Selects the order the buffers are listed in. Either by buffer
+ R             Toggles relative path/absolute path.
+ s             Cycle thru how the buffers are listed. Either by buffer
                number, file name, file extension, most recently used (MRU), or
                full path.
+ S             Cycle thru how the buffers are listed, in reverse order.
+	       Either by buffer number, file name, file extension, most
+               recently used (MRU), or full path.
+ T             Toggles to show only buffers for this tab or not.
  t             Opens the buffer that is under the cursor in another tab.
  u             Toggles the showing of "unlisted" buffers.
 
@@ -105,6 +111,14 @@ WINDOW LAYOUT                                       *bufexplorer-windowlayout*
 
 ===============================================================================
 CUSTOMIZATION                                       *bufexplorer-customization*
+
+If you do not like the default key mappings of \be, \bs, and \bv, you can
+override bufexplorer's default mappings by setting up something like the
+following in your vimrc file:
+
+  noremap <silent> <F11> :BufExplorer<CR>
+  noremap <silent> <m-F11> :BufExplorerHorizontalSplit<CR>
+  noremap <silent> <c-F11> :BufExplorerVerticalSplit<CR>
 
                                                           *g:bufExplorerChgWin*
 If set, bufexplorer will bring up the selected buffer in the window specified
@@ -199,6 +213,16 @@ The default is to use the global &splitright.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.3.0  - It has been quite a while since I published a new version and this
+         is the first version since Vim 7.3 was released.
+         * Thanks to Tim Johnson for testing out this new version.
+         * I have put some time into reworking and cleaning up the code as
+         * well as various bug fixes.
+         * I have hopefully allowed for better mapping of the main public
+           methods as is explained in the|bufexplorer-customization|section
+           of the documentation.
+         * Add new 'B', 'o', and 'S' key mappings.
+         * Overall, I am hopeful that I not forgotten or lost a feature.
 7.2.8  - Enhancements:
          * Thanks to Charles Campbell for integrating bufexplorer with GDBMGR.
            http://mysite.verizon.net/astronaut/vim/index.html#GDBMGR
