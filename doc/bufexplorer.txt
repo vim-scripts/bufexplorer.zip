@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 09 Oct 2012
+*bufexplorer.txt*              Buffer Explorer       Last Change: 04 Dec 2012
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.3.0
+                                Version 7.3.1
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -213,6 +213,12 @@ The default is to use the global &splitright.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.3.1  - Fix:
+         * Thanks go out to Brett Rasmussen for pointing out that the feature
+           added way back in version 7.2.3 by Yuriy Ershov to automatically
+           reposition the cursor to the line containing the active buffer, was
+           no longer in the plugin.  That bit of code has been re-added and
+           all is well.
 7.3.0  - It has been quite a while since I published a new version and this
          is the first version since Vim 7.3 was released.
          * Thanks to Tim Johnson for testing out this new version.

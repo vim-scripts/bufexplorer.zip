@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Tuesday, 09 Oct 2012
+" Last Changed: Tuesday, 04 Dec 2012
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -38,6 +38,7 @@
 "      History: See supplied documentation.
 "      Issues: 'D' and 'd' remove the buffer from the list but the list is not
 "              displayed correctly.
+"              - Add ability to open a buffer in a new split when \be is used.
 "=============================================================================
 
 " Plugin Code {{{1
@@ -48,7 +49,7 @@ endif
 "2}}}
 
 " Version number
-let g:bufexplorer_version = "7.3.0"
+let g:bufexplorer_version = "7.3.1"
 
 " Check for Vim version {{{2
 if v:version < 700
@@ -391,6 +392,11 @@ function! BufExplorer(open)
     endif
 
     call s:DisplayBufferList()
+
+    " Position the cursor in the newly displayed list on the line representing
+    " the active buffer.  The active buffer is the line with the '%' character
+    " in it.
+    execute search("%")
 endfunction
 
 " DisplayBufferList {{{2
@@ -830,12 +836,14 @@ endfunction
 function! s:DeleteBuffer(buf, mode)
     " This routine assumes that the buffer to be removed is on the current line.
     try
+        " Wipe/Delete buffer from Vim.
         if a:mode == "wipe"
             exe "silent bwipe" a:buf
         else
             exe "silent bdelete" a:buf
         endif
 
+        " Delete the buffer from the list on screen.
         setlocal modifiable
         normal! "_dd
         setlocal nomodifiable
