@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 04 Dec 2012
+*bufexplorer.txt*              Buffer Explorer       Last Change: 23 Dec 2012
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.3.1
+                                Version 7.3.2
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -213,6 +213,10 @@ The default is to use the global &splitright.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.3.2  - Fix:
+         * Thanks go out to Michael Henry for pointing out that I completely
+           missed yet another function, ReverseSortSelect(), during the
+           refactoring.  This function has now returned.
 7.3.1  - Fix:
          * Thanks go out to Brett Rasmussen for pointing out that the feature
            added way back in version 7.2.3 by Yuriy Ershov to automatically

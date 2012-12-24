@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Tuesday, 04 Dec 2012
+" Last Changed: Sunday, 23 Dec 2012
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -49,7 +49,7 @@ endif
 "2}}}
 
 " Version number
-let g:bufexplorer_version = "7.3.1"
+let g:bufexplorer_version = "7.3.2"
 
 " Check for Vim version {{{2
 if v:version < 700
@@ -966,6 +966,12 @@ endfunction
 " SortSelect {{{2
 function! s:SortSelect()
     let g:bufExplorerSortBy = get(s:sort_by, index(s:sort_by, g:bufExplorerSortBy) + 1, s:sort_by[0])
+    call s:ReSortListing()
+endfunction
+
+" ReverseSortSelect {{{2
+function! s:ReverseSortSelect()
+    let g:bufExplorerSortBy = get(s:sort_by, index(s:sort_by, g:bufExplorerSortBy) - 1, s:sort_by[-1])
     call s:ReSortListing()
 endfunction
 
