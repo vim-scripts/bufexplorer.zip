@@ -1,5 +1,5 @@
 "=============================================================================
-"    Copyright: Copyright (C) 2001-2012 Jeff Lanzarotta
+"    Copyright: Copyright (C) 2001-2013 Jeff Lanzarotta
 "               Permission is hereby granted to use and distribute this code,
 "               with or without modifications, provided that this copyright
 "               notice is copied with it. Like anything else that's free,
@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Sunday, 23 Dec 2012
+" Last Changed: Monday, 14 Jan 2013
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -49,7 +49,7 @@ endif
 "2}}}
 
 " Version number
-let g:bufexplorer_version = "7.3.2"
+let g:bufexplorer_version = "7.3.3"
 
 " Check for Vim version {{{2
 if v:version < 700
@@ -378,8 +378,14 @@ function! BufExplorer(open)
         " Set the setting to ours.
         let [&splitbelow, &splitright] = [g:bufExplorerSplitBelow, g:bufExplorerSplitRight]
 
-        " Do it.
-        exe 'keepalt '.s:splitMode
+        let _size = (s:splitMode == "sp") ? g:bufExplorerSplitHorzSize : g:bufExplorerSplitVertSize
+
+        " Split the window either horizontally or vertically.
+        if _size <= 0
+            execute 'keepalt ' . s:splitMode
+        else
+            execute 'keepalt ' . _size . s:splitMode
+        endif
 
         " Restore the original settings.
         let [&splitbelow, &splitright] = [_splitbelow, _splitright]
@@ -1152,6 +1158,8 @@ call s:Set("g:bufExplorerSortBy", "mru")            " Sorting methods are in s:s
 call s:Set("g:bufExplorerSplitBelow", &splitbelow)  " Should horizontal splits be below or above current window?
 call s:Set("g:bufExplorerSplitOutPathName", 1)      " Split out path and file name?
 call s:Set("g:bufExplorerSplitRight", &splitright)  " Should vertical splits be on the right or left of current window?
+call s:Set("g:bufExplorerSplitVertSize", 0)        " Height for a vertical split. If <=0, default Vim size is used.
+call s:Set("g:bufExplorerSplitHorzSize", 0)        " Height for a horizontal split. If <=0, default Vim size is used.
 "1}}}
 
 " vim:ft=vim foldmethod=marker sw=4
