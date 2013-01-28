@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 14 Jan 2013
+*bufexplorer.txt*              Buffer Explorer       Last Change: 28 Jan 2013
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.3.3
+                                Version 7.3.4
 
 Plugin for easily exploring (or browsing) Vim|:buffers|.
 
@@ -80,7 +80,7 @@ Commands to use once exploring:
                number, file name, file extension, most recently used (MRU), or
                full path.
  S             Cycle thru how the buffers are listed, in reverse order.
-	       Either by buffer number, file name, file extension, most
+               Either by buffer number, file name, file extension, most
                recently used (MRU), or full path.
  T             Toggles to show only buffers for this tab or not.
  t             Opens the buffer that is under the cursor in another tab.
@@ -226,7 +226,11 @@ The default is 0, so that the size is set by Vim.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
-7.3.3    January 14, 2012
+7.3.4    January 28, 2013
+    * Thanks go out to John Szakmeister for finding and fixing a bug in the
+      RebuildBufferList method.  The keepjumps line that clears the list could
+      potentially reference a backwards range.
+7.3.3    January 14, 2013
     * Major cleanup and reorganization of the change log.
     * We welcome the return of g:bufExplorerSplitHorzSize and
       g:bufExplorerSplitVertSize.  When setting these values, anything less

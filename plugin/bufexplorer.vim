@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Monday, 14 Jan 2013
+" Last Changed: Monday, 28 Jan 2013
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -49,7 +49,7 @@ endif
 "2}}}
 
 " Version number
-let g:bufexplorer_version = "7.3.3"
+let g:bufexplorer_version = "7.3.4"
 
 " Check for Vim version {{{2
 if v:version < 700
@@ -700,7 +700,7 @@ endfunction
 function! s:SelectBuffer(...)
     " Sometimes messages are not cleared when we get here so it looks like an
     " error has occurred when it really has not.
-" 3/25/2012    echo ""
+    "echo ""
 
     " Are we on a line with a file name?
     if line('.') < s:firstBufferLine
@@ -934,7 +934,7 @@ function! s:RebuildBufferList(...)
 
     let curPos = getpos('.')
 
-    if a:0
+    if a:0 && (line('$') >= s:firstBufferLine)
         " Clear the list first.
         exec "keepjumps ".s:firstBufferLine.',$d "_'
     endif
