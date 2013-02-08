@@ -10,7 +10,7 @@
 " Name Of File: bufexplorer.vim
 "  Description: Buffer Explorer Vim Plugin
 "   Maintainer: Jeff Lanzarotta (delux256-vim at yahoo dot com)
-" Last Changed: Monday, 28 Jan 2013
+" Last Changed: Friday, 08 Feb 2013
 "      Version: See g:bufexplorer_version for version number.
 "        Usage: This file should reside in the plugin directory and be
 "               automatically sourced.
@@ -49,7 +49,7 @@ endif
 "2}}}
 
 " Version number
-let g:bufexplorer_version = "7.3.4"
+let g:bufexplorer_version = "7.3.5"
 
 " Check for Vim version {{{2
 if v:version < 700
@@ -239,11 +239,6 @@ function! s:ShouldIgnore(buf)
         return 1
     endif
 
-    " Ignore unlisted buffers.
-    if buflisted(a:buf) == 0
-        return 1
-    endif
-
     " Ignore buffers with no name.
     if empty(bufname(a:buf)) == 1
         return 1
@@ -355,21 +350,6 @@ function! BufExplorer(open)
 
     silent let s:raw_buffer_listing = s:GetBufferInfo(0)
 
-    let buffer_listing_copy = copy(s:raw_buffer_listing)
-
-    if (g:bufExplorerShowUnlisted == 0)
-        call filter(buffer_listing_copy, 'v:val.attributes !~ "u"')
-    endif
-
-    if (!empty(buffer_listing_copy))
-        call filter(buffer_listing_copy, 'v:val.shortname !~ "\\\[No Name\\\]"')
-    endif
-
-"   if len(buffer_listing_copy) <= 1
-"       call s:Warning("Sorry, there are no more buffers to explore")
-"       return
-"   endif
-
     " We may have to split the current window.
     if (s:splitMode != "")
         " Save off the original settings.
@@ -416,6 +396,14 @@ function! s:DisplayBufferList()
 
     call s:SetupSyntax()
     call s:MapKeys()
+
+"NEW
+    " Wipe out any existing lines in case BufExplorer buffer exists and the
+    " user had changed any global settings that might reduce the number of
+    " lines needed in the buffer.
+    keepjumps 1,$d _
+"NEW
+
     call setline(1, s:CreateHelp())
     call s:BuildBufferList()
     call cursor(s:firstBufferLine, 1)
@@ -603,10 +591,19 @@ function! s:GetBufferInfo(bufnr)
     " Loop over each line in the buffer.
     for buf in split(bufoutput, '\n')
         let bits = split(buf, '"')
-        let b = {"attributes": bits[0], "line": substitute(bits[2], '\s*', '', '')}
+
+        " Use first and last components after the split on '"', in case a
+        " filename with an embedded '"' is present.
+        let b = {"attributes": bits[0], "line": substitute(bits[-1], '\s*', '', '')}
+
+        let name = bufname(str2nr(b.attributes))
+        let b["hasNoName"] = empty(name)
+        if b.hasNoName
+            let name = "[No Name]"
+        endif
 
         for [key, val] in items(s:types)
-            let b[key] = fnamemodify(bits[1], val)
+            let b[key] = fnamemodify(name, val)
         endfor
 
         if getftype(b.fullname) == "dir" && g:bufExplorerShowDirectories == 1
@@ -646,8 +643,8 @@ function! s:BuildBufferList()
             continue
         endif
 
-        " Ignore buffers with no name.
-        if empty(bufname(str2nr(buf.attributes))) == 1
+        " Skip "No Name" buffers if we are not to show them.
+        if (!g:bufExplorerShowNoName && buf.hasNoName)
             continue
         endif
 
@@ -934,9 +931,9 @@ function! s:RebuildBufferList(...)
 
     let curPos = getpos('.')
 
-    if a:0 && (line('$') >= s:firstBufferLine)
+    if a:0 && a:000[0] && (line('$') >= s:firstBufferLine)
         " Clear the list first.
-        exec "keepjumps ".s:firstBufferLine.',$d "_'
+        exec "keepjumps ".s:firstBufferLine.',$d _'
     endif
 
     let num_bufs = s:BuildBufferList()
@@ -1154,6 +1151,7 @@ call s:Set("g:bufExplorerShowDirectories", 1)       " (Dir's are added by comman
 call s:Set("g:bufExplorerShowRelativePath", 0)      " Show listings with relative or absolute paths?
 call s:Set("g:bufExplorerShowTabBuffer", 0)         " Show only buffer(s) for this tab?
 call s:Set("g:bufExplorerShowUnlisted", 0)          " Show unlisted buffers?
+call s:Set("g:bufExplorerShowNoName", 0)            " Show "No Name" buffers?
 call s:Set("g:bufExplorerSortBy", "mru")            " Sorting methods are in s:sort_by:
 call s:Set("g:bufExplorerSplitBelow", &splitbelow)  " Should horizontal splits be below or above current window?
 call s:Set("g:bufExplorerSplitOutPathName", 1)      " Split out path and file name?

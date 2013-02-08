@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 28 Jan 2013
+*bufexplorer.txt*              Buffer Explorer       Last Change: 08 Feb 2013
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.3.4
+                                Version 7.3.5
 
 Plugin for easily exploring (or browsing) Vim|:buffers|.
 
@@ -157,9 +157,15 @@ The default is NOT to sort in reverse order.
                                                  *g:bufExplorerShowDirectories*
 Directories usually show up in the list from using a command like ":e .".
 To control whether to show directories in the buffer list or not, use: >
+  let g:bufExplorerShowDirectories=0   " Do not show directories.
   let g:bufExplorerShowDirectories=1   " Show directories.
-  let g:bufExplorerShowDirectories=0   " Don't show directories.
 The default is to show directories.
+
+                                                      *g:bufExplorerShowNoName*
+To control whether to show "No Name" buffers or not, use: >
+  let g:bufExplorerShowNoName=0        " Do not "No Name" buffers.
+  let g:bufExplorerShowNoName=1        " Show "No Name" buffers.
+The default is to NOT show "No Name buffers.
 
                                                 *g:bufExplorerShowRelativePath*
 To control whether to show absolute paths or relative to the current
@@ -226,6 +232,11 @@ The default is 0, so that the size is set by Vim.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.3.5    February 08, 2013
+    * Michael Henry added the ability to view "No Name" buffers.  This
+      functionality was lost since version 7.3.0.  He also did some removal of
+      "dead" code and cleaned up the code to handle filenames with embedded
+      '"'.
 7.3.4    January 28, 2013
     * Thanks go out to John Szakmeister for finding and fixing a bug in the
       RebuildBufferList method.  The keepjumps line that clears the list could
