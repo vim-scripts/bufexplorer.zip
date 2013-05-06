@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 08 Feb 2013
+*bufexplorer.txt*              Buffer Explorer       Last Change: 06 May 2013
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.3.5
+                                Version 7.3.6
 
 Plugin for easily exploring (or browsing) Vim|:buffers|.
 
@@ -232,6 +232,10 @@ The default is 0, so that the size is set by Vim.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.3.6    May, 06, 2013
+    * Removed the 'drop' window command that was causing issue with the
+      argument-list being modified after the BufExplorer windows was
+      displayed.
 7.3.5    February 08, 2013
     * Michael Henry added the ability to view "No Name" buffers.  This
       functionality was lost since version 7.3.0.  He also did some removal of
