@@ -1133,6 +1133,7 @@ endif
 let g:BufExplorer_title = "\[Buf\ List\]"
 call s:Set("g:bufExplorerResize", 1)
 call s:Set("g:bufExplorerMaxHeight", 25) " Handles dynamic resizing of the window.
+call s:Set("g:bufExplorerMinHeight", 20) " Handles dynamic resizing of the window.
 
 " function! to start display. Set the mode to 'winmanager' for this buffer.
 " This is to figure out how this plugin was called. In a standalone fashion
@@ -1159,6 +1160,7 @@ function! BufExplorer_ReSize()
     end
 
     let nlines = min([line("$"), g:bufExplorerMaxHeight])
+    let nlines = max([nlines, g:bufExplorerMinHeight])
 
     execute nlines." wincmd _"
 
