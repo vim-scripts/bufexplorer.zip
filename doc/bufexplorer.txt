@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 03 Nov 2014
+*bufexplorer.txt*              Buffer Explorer       Last Change: 04 Jan 2015
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.4.6
+                                Version 7.4.7
 
 Plugin for easily exploring (or browsing) Vim|:buffers|.
 
@@ -250,6 +250,8 @@ The default is 0, so that the size is set by Vim.
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.4.7    January 04, 2015
+    - Added gBufExplorerMinHeight for control window size.
 7.4.6    November 03, 2014
     - Not sure how, but the file format was converted to Dos instead of Unix.
       I converted the file back to Unix.
